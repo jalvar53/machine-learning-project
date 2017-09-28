@@ -5,6 +5,7 @@ import Math as math
 import Trainer
 import Turtlebot
 import ImageProcessor
+import cv2
 
 if __name__ == '__main__':
     trainer = Trainer.Trainer()
@@ -20,24 +21,17 @@ if __name__ == '__main__':
         rospy.loginfo("No image captured")
     turtlebot.retrieve_data()
     x, y = trainer.get_x_y()
-    theta = trainer.gradient_descent(100, 0.01, 100)
-    h = math.sigmoid(np.einsum('ij,jk', x, theta))
-    maxi = 0
-    mini = 100001
-    for i in range(y.shape[0]):
-        if not (y[i]) and h[i] < mini:
-            mini = h[i]
-        elif y[i] and h[i] > maxi:
-            maxi = h[i]
-    sol = np.zeros((x.shape[0], x.shape[1]+1), 'float')
-    sol[:, 0] = x[:, 0]
-    sol[:, 1] = x[:, 1]
-    sol[:, 2] = x[:, 2]
-    sol[:, 3] = x[:, 3]
-    sol[:, 4] = y.reshape(108)
-    print(sol)
-    print(h)
-    print("Maximum: %f Minimun: %f" % (maxi, mini))
-    print(math.probability([1, 1, 1, 3.13423863e-300], theta))
+    i = 0
+
+    while (i < 1000):
+        cv2.imshow("miNombre", turtlebot.image)
+        cv2.waitKey(33)
+        i += 1
+        # print(i)
+
+    model_trainer = math.svm.SVC()
+    model_trainer.fit(x, y.reshape((x.shape[0])))
+
+    print(model_trainer.predict([[155, 155, 155, 0], [153.5, 153.5, 153.5, 0], [156.85, 156.85, 156.85, 0], [156.5, 156.5, 156.5, 0]]))
 
 rospy.sleep(1)

@@ -42,8 +42,8 @@ class Turtlebot:
     def move(self, pub):
         msg = Twist()
         r = rospy.Rate(10)
-        msg.linear.x = 0.2
-        msg.linear.y = 0.2
+        msg.linear.x = 1
+        msg.linear.y = 2
         msg.angular.z = 0
         tini = time.time()
 
@@ -113,7 +113,7 @@ class Turtlebot:
         B = np.mean(B)
         return [R, G, B]
 
-    def entropy(self,img):
+    def entropy(self, img):
         cv2.imwrite('aux.jpg', img)
         try:
             d = 'aux.jpg'
