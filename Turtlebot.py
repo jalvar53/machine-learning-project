@@ -26,9 +26,13 @@ class Turtlebot:
         self.masked_image = []
         img_topic = "/camera/rgb/image_raw"
         self.image_sub = rospy.Subscriber(img_topic, Image, self.convert_to_cv_format)
-        self.image = []
+        #self.image = []
         self.image_received = False
         rospy.sleep(1)
+
+    def refresh_image(self):
+        img_topic = "/camera/rgb/image_raw"
+        self.image_sub = rospy.Subscriber(img_topic, Image, self.convert_to_cv_format)
 
     def convert_to_cv_format(self, data):
         try:
@@ -39,19 +43,28 @@ class Turtlebot:
         self.image_received = True
         self.image = cv_image
 
-    def move(self, pub):
+    def move(self, pub, p):
         msg = Twist()
-        r = rospy.Rate(10)
-        msg.linear.x = 1
-        msg.linear.y = 2
-        msg.angular.z = 0
-        tini = time.time()
+        # r = rospy.Rate(10)
+        # msg.linear.x = 1
+        # msg.linear.y = 2
+        # msg.angular.z = 0
+        # tini = time.time()
+        if(p[100]==1 and p[101]==1 and p[102]==1 and p[103]==1):
+            msg.linear.x = 2
+            msg.angular.z= 0
+        else:
+            msg.linear.x = 0
+            msg.angular.z= 2
+        pub.publish(msg)
 
-        while time.time() - tini < 5:
-            pub.publish(msg)
-            r.sleep()
+        # while time.time() - tini < 5:
+        #     pub.publish(msg)
+        #     r.sleep()
 
     def retrieve_data(self):
+        self.trainer.x = []
+        self.trainer.y = []
         vis = np.zeros(self.image.shape[:2], dtype="float")
         pixels = slic(self.image, n_segments=100, sigma=5)
         for v in np.unique(pixels):
@@ -73,13 +86,12 @@ class Turtlebot:
             else:
                 self.trainer.y.append(0)
                 vis[pixels == v] = 0
-
         self.trainer.x = np.asarray(self.trainer.x)
         self.trainer.y = np.asarray(self.trainer.y)
         self.trainer.y = self.trainer.y.reshape(self.trainer.x.shape[0], 1)
-        plt.subplot(121), plt.imshow(mark_boundaries(self.image, pixels))
-        plt.subplot(122), plt.imshow(vis)
-        plt.show()
+        #plt.subplot(121), plt.imshow(mark_boundaries(self.image, pixels))
+        #plt.subplot(122), plt.imshow(vis)
+        #plt.show()
 
     def get_rgb_channels(self):
         red = np.zeros((480, 640, 3), 'uint8')
