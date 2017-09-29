@@ -20,6 +20,10 @@ if __name__ == '__main__':
         rospy.loginfo("Image saved " + title)
     else:
         rospy.loginfo("No image captured")
+    turtlebot.retrieve_data()
+    x, y = trainer.get_x_y()
+    model_trainer = svm.SVC()
+    model_trainer.fit(x, y.reshape((x.shape[0])))
     for i in range(10):
         turtlebot.refresh_image()
         turtlebot.retrieve_data()
@@ -31,8 +35,7 @@ if __name__ == '__main__':
         #     cv2.waitKey(33)
         #     i += 1
         #     # print(i)
-        model_trainer = svm.SVC()
-        model_trainer.fit(x, y.reshape((x.shape[0])))
+
         p = model_trainer.predict(x)
         turtlebot.move(pub,p)
     #print(model_trainer.predict([[155, 155, 155, 0], [153.5, 153.5, 153.5, 0], [156.85, 156.85, 156.85, 0], [156.5, 156.5, 156.5, 0]]))
