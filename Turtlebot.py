@@ -51,11 +51,14 @@ class Turtlebot:
         # msg.angular.z = 0
         # tini = time.time()
         if(p[100]==1 and p[101]==1 and p[102]==1 and p[103]==1):
-            msg.linear.x = 2
+            msg.linear.x = 1
             msg.angular.z= 0
+        elif(p[104]==1 and p[105]==1):
+            msg.linear.x = 0
+            msg.angular.z= -1
         else:
             msg.linear.x = 0
-            msg.angular.z= 2
+            msg.angular.z= 1
         pub.publish(msg)
 
         # while time.time() - tini < 5:
@@ -65,8 +68,9 @@ class Turtlebot:
     def retrieve_data(self):
         self.trainer.x = []
         self.trainer.y = []
-        vis = np.zeros(self.image.shape[:2], dtype="float")
+        #vis = np.zeros(self.image.shape[:2], dtype="float")
         pixels = slic(self.image, n_segments=100, sigma=5)
+        #t = time.time()
         for v in np.unique(pixels):
             R = self.image[:, :, 0]
             G = self.image[:, :, 1]
@@ -76,16 +80,19 @@ class Turtlebot:
             B = B[pixels == v]
             img = np.dstack((R, G, B))
             means = self.calculate_means(img)
-            meansn = self.normalized_means(img)
+            #meansn = self.normalized_means(img)
             self.trainer.x.append((means[0], means[1], means[2], self.entropy(img)))
+            #print("tiempo proceso 1: %f" %(time.time()-t))
+            #t = time.time()
             img = self.masked_image[pixels == v]
             means = np.mean(img)
             if np.mean(means) > 127:
                 self.trainer.y.append(1)
-                vis[pixels == v] = 1
+                #vis[pixels == v] = 1
             else:
                 self.trainer.y.append(0)
-                vis[pixels == v] = 0
+                #vis[pixels == v] = 0
+        #print("tiempo proceso completo: %f" %(time.time()-t))
         self.trainer.x = np.asarray(self.trainer.x)
         self.trainer.y = np.asarray(self.trainer.y)
         self.trainer.y = self.trainer.y.reshape(self.trainer.x.shape[0], 1)

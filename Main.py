@@ -7,6 +7,7 @@ import Trainer
 import Turtlebot
 import ImageProcessor
 import cv2
+import time
 
 if __name__ == '__main__':
     trainer = Trainer.Trainer()
@@ -25,8 +26,13 @@ if __name__ == '__main__':
     model_trainer = svm.SVC()
     model_trainer.fit(x, y.reshape((x.shape[0])))
     for i in range(10):
+        #t = time.time()
         turtlebot.refresh_image()
+        #print("tiempo refrescar imagen: %f" %(time.time()-t))
+        #t = time.time()
         turtlebot.retrieve_data()
+        #print("tiempo sacar datos: %f" %(time.time()-t))
+        #t = time.time()
         x, y = trainer.get_x_y()
         i = 0
 
@@ -35,7 +41,6 @@ if __name__ == '__main__':
         #     cv2.waitKey(33)
         #     i += 1
         #     # print(i)
-
         p = model_trainer.predict(x)
         turtlebot.move(pub,p)
     #print(model_trainer.predict([[155, 155, 155, 0], [153.5, 153.5, 153.5, 0], [156.85, 156.85, 156.85, 0], [156.5, 156.5, 156.5, 0]]))
