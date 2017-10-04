@@ -30,6 +30,9 @@ class ImageProcessor:
                     bigger_frequency = i
             cv2.imwrite(img_title, (self.turtlebot.image[:, :, 0] == bigger_frequency)*255)
             self.turtlebot.masked_image = ((self.turtlebot.image[:, :, 0] == bigger_frequency)*255)
+            print(bigger_frequency)
+            #plt.imshow(mark_boundaries(self.masked_image, pixels))
+            #plt.show()
             return True
         else:
             return False
