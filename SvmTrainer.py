@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-
-import numpy as np
+from sklearn.externals import joblib
 from sklearn import svm
-from Image import Image
+import ImageManager
+
 
 class Trainer:
 
@@ -19,7 +19,15 @@ class Trainer:
     def get_x_y(self):
         return [self.x, self.y]
 
+    def train_model(self):
+        model = svm.SVC()
+        model.fit(self.x, self.y.reshape((self.x.shape[0])))
+
+    def save_model(self):
+        joblib.dump(self.model, 'model.pkl')
+
+
 if __name__ == '__main__':
-    ImgManager = Image()
-    ImgManager.loadImage()
+    img = ImageManager.load_image("frame0000")
+    segments = ImageManager.slice_image(img, 5, 5);
 
