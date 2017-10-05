@@ -9,19 +9,15 @@ import ImageManager
 class Trainer:
 
     def __init__(self):
+        self.model = svm.SVC()
         self.x = []
         self.y = []
-        self.model
-
-    def trainModel(self):
-        self.model = svm.SVC()
 
     def get_x_y(self):
         return [self.x, self.y]
 
     def train_model(self):
-        model = svm.SVC()
-        model.fit(self.x, self.y.reshape((self.x.shape[0])))
+        self.model.fit(self.x, self.y.reshape((self.x.shape[0])))
 
     def save_model(self):
         joblib.dump(self.model, 'model.pkl')

@@ -1,6 +1,6 @@
 from skimage.segmentation import slic
-import ImageStat
 import ImageManager
+import ImageStat
 import numpy
 import sys
 import cv2
@@ -16,7 +16,7 @@ def load_image(img_title):
     return img
 
 
-def slice_image(self, img, rows, columns):
+def slice_image(img, rows, columns):
     height, width, channels = img.shape
     height = height / rows
     width = width / columns
