@@ -1,13 +1,11 @@
-import rospy
 import numpy as np
+import rospy
 from geometry_msgs.msg import Twist
 from sklearn import svm
-import Math as math
+
+import ImageProcessor
 import Trainer
 import Turtlebot
-import ImageProcessor
-import cv2
-import time
 
 if __name__ == '__main__':
     trainer = Trainer.Trainer()

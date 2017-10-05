@@ -26,6 +26,7 @@ class Turtlebot:
         self.masked_image = []
         img_topic = "/camera/rgb/image_raw"
         self.image_sub = rospy.Subscriber(img_topic, Image, self.convert_to_cv_format)
+        #self.image = []
         self.image_received = False
         rospy.sleep(1)
 

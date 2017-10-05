@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
+
 import numpy as np
-import Math as math
 
 
 class Trainer:
@@ -13,11 +13,11 @@ class Trainer:
 
     def gradient_descent(self, num_iter, alpha, lambd):
         m = self.x.shape[0]
-        x = math.feature_scaling(self.x)
+        x = Math.feature_scaling(self.x)
         y = self.y
         theta = np.zeros((x.shape[1],1))
         for i in range(num_iter):
-            h = math.sigmoid(np.einsum('ij,jk', x, theta))
+            h = Math.sigmoid(np.einsum('ij,jk', x, theta))
             theta = theta - (alpha/m)*np.einsum('ji,jk', x, (h-y))
 
             j = (np.einsum('ji,jk', -1*y, np.log(h)) - np.einsum('ji,jk', (1-y), np.log(1-h)))/m
