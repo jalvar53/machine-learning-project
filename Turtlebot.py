@@ -1,19 +1,17 @@
+import cv2
 import rospy
 from geometry_msgs.msg import Twist
-from sklearn.externals import joblib
+from SvmModel import SvmModel
+import ImageManager
+
 
 class Turtlebot:
 
     def __init__(self):
-        self.publisher = rospy.Publisher('cmd_vel_mux/input/navi', Twist, queue_size=10)
-        rospy.on_shutdown(self.shutdown)
-        self.model = None
-
-    def retrieve(self):
-        self.model = joblib.load('model.pk1')
-
-    def predict(self):
-        a = None
+        #self.publisher = rospy.Publisher('cmd_vel_mux/input/navi', Twist, queue_size=10)
+        #rospy.on_shutdown(self.shutdown)
+        self.svm = SvmModel()
+        self.x = 0
 
     def move(self):
         msg = Twist()
@@ -28,10 +26,16 @@ class Turtlebot:
         rospy.sleep(1)
 
 if __name__ == '__main__':
-    rospy.init_node('Turtlebot', anonymous=False)
+    #rospy.init_node('Turtlebot', anonymous=False)
     turtlebot = Turtlebot()
-    rate = rospy.Rate(10)
+    #rate = rospy.Rate(10)
 
-    while not rospy.is_shutdown():
-        turtlebot.move()
+    image = ImageManager.load_image("assets/raw/frame0040")
+    segments = ImageManager.slic_image(image,100)
+    turtlebot.svm.load_model()
+    mask = turtlebot.svm.predict(image, segments)
+    print(mask)
+
+    #while not rospy.is_shutdown():
+    #    turtlebot.move()
 

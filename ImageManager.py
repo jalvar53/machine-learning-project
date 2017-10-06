@@ -8,11 +8,12 @@ import os
 
 
 def load_image(img_title):
-    path = 'assets/raw/frame'+img_title+'.jpg'
+    path = img_title + '.jpg'
+    print(path)
     img = cv2.imread(path, -1)
-    cv2.imshow("Image", img)
-    cv2.waitKey()
-    cv2.destroyAllWindows()
+    # cv2.imshow("Image", img)
+    # cv2.waitKey()
+    # cv2.destroyAllWindows()
     return img
 
 
@@ -54,6 +55,7 @@ def calculate_means(img):
 
 
 def calculate_means2(img):
+    img = slic(img, 10)
     R = img[:, 0]
     G = img[:, 1]
     B = img[:, 2]
@@ -64,22 +66,20 @@ def calculate_means2(img):
 
 
 def entropy(img):
-    cv2.imwrite('temp.jpg', img)
+    #cv2.imwrite('temp.jpg', img)
+    noise = 0
+    #try:
+    #    img = 'temp'
+    #    img = ImageManager.load_image(img)
+    #    stat = ImageStat.Stat(img)
+    #    for i in [float(elem) / stat.count[0] for elem in stat.h]:
+    #        if i != 0:
+    #            noise += i * cv2.log(1. / i, 2)
 
-    try:
-        img = 'aux.jpg'
-        img = ImageManager.load_image(img)
-        stat = ImageStat.Stat(img)
-        noise = 0
-        for i in [float(elem) / stat.count[0] for elem in stat.h]:
-            if i != 0:
-                noise += i * cv2.log(1. / i, 2)
+    #except StandardError:
+    #    print("Unexpected error: ", sys.exc_info()[0])
 
-    except StandardError:
-        print("Unexpected error: ", sys.exc_info()[0])
-
-    os.remove('aux.jpg')
-
+    #os.remove('temp.jpg')
     if noise == 0:
         noise = 1e-310
     return noise
