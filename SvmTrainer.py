@@ -5,7 +5,7 @@ from sklearn.externals import joblib
 from sklearn import svm
 import ImageManager
 import numpy as np
-import cv2
+import time
 
 
 class Trainer:
@@ -19,9 +19,10 @@ class Trainer:
         return [self.x, self.y]
 
     def train_model(self):
+        t = time.time()
         for i in range(10):
-            img = ImageManager.load_image("000" + str(i))
-            cmp = cv2.imread("assets/mask/frame000"+str(i)+".jpg", -1)
+            img = ImageManager.load_image('assets/raw/frame000' + str(i) + '.jpg')
+            cmp = ImageManager.load_image("assets/mask/frame000"+str(i)+".jpg")
             parts = ImageManager.slice_image(img,9,12)
             for j in range(108):
                 means = ImageManager.calculate_means(parts[j])
@@ -30,12 +31,12 @@ class Trainer:
                     self.y.append(1)
                 else:
                     self.y.append(0)
-            #print(len(parts))
         self.x = np.asarray(self.x)
         self.y = np.asarray(self.y)
         self.y = self.y.reshape(self.x.shape[0], 1)
-        #print(self.x.shape)
-        #print(self.y.shape)
+        print(self.x)
+        print(self.y)
+        print(time.time()-t)
         self.model.fit(self.x, self.y.reshape((self.x.shape[0])))
 
     def save_model(self):
@@ -43,7 +44,6 @@ class Trainer:
 
 
 if __name__ == '__main__':
-    #img = ImageManager.load_image("frame0000")
-    #segments = ImageManager.slice_image(img, 5, 5)
     trainer = Trainer()
     trainer.train_model()
+    trainer.save_model()

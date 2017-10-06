@@ -10,9 +10,10 @@ from math import log
 
 
 def load_image(img_title):
-    path = 'assets/raw/frame'+img_title+'.jpg'
-    img = cv2.imread(path, -1)
-    cv2.imshow("Image" + img_title, img)
+    #path = 'assets/raw/frame'+img_title+'.jpg'
+    #path = img_title
+    img = cv2.imread(img_title, -1)
+    cv2.imshow(img_title, img)
     cv2.waitKey()
     cv2.destroyAllWindows()
     return img
@@ -85,7 +86,9 @@ def entropy(img):
         print("Unexpected error: ", sys.exc_info()[0])
 
     os.remove('aux.jpg')
+
     noise = h
+
     if noise == 0:
         noise = 1e-310
     return noise
