@@ -10,10 +10,10 @@ from math import log
 
 
 def load_image(img_title):
-    #path = 'assets/raw/frame'+img_title+'.jpg'
-    #path = img_title
-    img = cv2.imread(img_title, -1)
-    cv2.imshow(img_title, img)
+    path = img_title + '.jpg'
+    print(path)
+    img = cv2.imread(path, -1)
+    cv2.imshow("Image" + img_title, img)
     cv2.waitKey()
     cv2.destroyAllWindows()
     return img
@@ -60,6 +60,7 @@ def calculate_means(img):
 
 
 def calculate_means2(img):
+    img = slic(img, 10)
     R = img[:, 0]
     G = img[:, 1]
     B = img[:, 2]
