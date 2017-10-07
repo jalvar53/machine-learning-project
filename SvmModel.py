@@ -14,12 +14,8 @@ class SvmModel:
         self.x = []
         self.y = []
 
-    def get_x_y(self):
-        return [self.x, self.y]
 
     def train_model_slic(self, image, mask, segments):
-        self.x = []
-        self.y = []
         for segment in np.unique(segments):
             img = image[segments == segment]
             means = ImageManager.calculate_means2(img)
@@ -37,24 +33,20 @@ class SvmModel:
         self.y = self.y.reshape(self.x.shape[0], 1)
         self.model.fit(self.x, self.y.reshape((self.x.shape[0])))
 
-    def train_model_slice(self, parts):
-        self.x = []
-        self.y = []
+
+    def calculate_data(self, parts, mask):
         for j in range(len(parts)):
 
             means = ImageManager.calculate_means(parts[j])
             self.x.append((means[0], means[1], means[2], ImageManager.entropy(parts[j])))
-            if np.mean(cmp[int(j / 12) * 53:(int(j / 12) + 1) * 53, j % 12 * 53:((j % 12) + 1) * 53, :]) > 130:
-                self.y.append(1)
-            else:
-                self.y.append(0)
+            self.y.append(ImageManager.calculate_y(mask,j))
 
+    def train_model_slice(self):
         self.x = np.asarray(self.x)
         self.y = np.asarray(self.y)
-        self.y = self.y.reshape(self.x.shape[0], 1)
-        print(self.x)
-        print(self.y)
+        #self.y = self.y.reshape(self.x.shape[0], 1)
         self.model.fit(self.x, self.y.reshape((self.x.shape[0])))
+
 
     def save_model(self):
         joblib.dump(self.model, 'model.pkl')
@@ -74,22 +66,37 @@ class SvmModel:
         msk = self.model.predict(self.x)
         return msk
 
+    def get_x_y(self):
+        return [self.x, self.y]
+
+    def get_x(self):
+        return self.x
+
+    def get_y(self):
+        return self.y
+
+    def get_model(self):
+        return self.model
+
 
 if __name__ == '__main__':
     print("Training the model")
     svm = SvmModel()
     for i in range(20):
-        if i <= 9:
-            img_name = 'assets/raw/frame000' + str(i)
-            mask_name = 'assets/mask/frame000' + str(i)
-        else:
-            img_name = 'assets/raw/frame00' + str(i)
-            mask_name = 'assets/mask/frame00' + str(i)
+        img_name = 'assets/raw/frame' + str(int(i/1000))
+        mask_name = 'assets/raw/frame' + str(int(i/1000))
+        num = i%1000
+        img_name += str(int(num/100))
+        mask_name += str(int(num/100))
+        num = num % 100
+        img_name += str(int(num/10)) + str(int(num%10))
+        mask_name += str(int(num/10)) + str(int(num%10))
+
         image = ImageManager.load_image(img_name)
         mask = ImageManager.load_image(mask_name)
-        segments = ImageManager.slic_image(image, 100)
+        #segments = ImageManager.slic_image(image, 100)
         parts = ImageManager.slice_image(image,9,12)
-        svm.train_model_slic(image, mask, segments)
-        svm.train_model_slice(parts)
+        #svm.train_model_slic(image, mask, segments)
+        svm.calculate_data(parts, mask)
+    svm.train_model_slice()
     svm.save_model()
-

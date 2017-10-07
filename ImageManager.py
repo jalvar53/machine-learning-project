@@ -13,9 +13,9 @@ def load_image(img_title):
     path = img_title + '.jpg'
     print(path)
     img = cv2.imread(path, -1)
-    cv2.imshow("Image" + img_title, img)
-    cv2.waitKey()
-    cv2.destroyAllWindows()
+    #cv2.imshow("Image" + img_title, img)
+    #cv2.waitKey()
+    #cv2.destroyAllWindows()
     return img
 
 
@@ -23,16 +23,12 @@ def slice_image(img, rows, columns):
     height, width, channels = img.shape
     height = height / rows
     width = width / columns
-    #size = (rows, columns, height, width, channels)
-    #size = (rows, columns, channels)
-    #parts = numpy.zeros(size)
     parts=[]
 
     for i in range(0, rows):
 
         for j in range(0, columns):
 
-            #parts[i, j] = img[i * height:(i + 1) * height, j * width:(j + 1) * width]
             parts.append(img[i * height:(i + 1) * height, j * width:(j + 1) * width])
 
     return parts
@@ -60,7 +56,6 @@ def calculate_means(img):
 
 
 def calculate_means2(img):
-    img = slic(img, 10)
     R = img[:, 0]
     G = img[:, 1]
     B = img[:, 2]
@@ -68,6 +63,9 @@ def calculate_means2(img):
     G = numpy.mean(G)
     B = numpy.mean(B)
     return [R, G, B]
+
+def calculate_y(mask,j):
+    return numpy.mean(mask[int(j / 12) * 53:(int(j / 12) + 1) * 53, j % 12 * 53:((j % 12) + 1) * 53, :]) > 130
 
 
 def entropy(img):
