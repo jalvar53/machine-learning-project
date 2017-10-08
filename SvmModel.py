@@ -82,9 +82,9 @@ class SvmModel:
 if __name__ == '__main__':
     print("Training the model")
     svm = SvmModel()
-    for i in range(20):
+    for i in range(21):
         img_name = 'assets/raw/frame' + str(int(i/1000))
-        mask_name = 'assets/raw/frame' + str(int(i/1000))
+        mask_name = 'assets/mask/frame' + str(int(i/1000))
         num = i%1000
         img_name += str(int(num/100))
         mask_name += str(int(num/100))
