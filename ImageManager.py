@@ -18,6 +18,14 @@ def load_image(img_title):
     #cv2.destroyAllWindows()
     return img
 
+def retrieve_data(img):
+    means = ImageManager.calculate_means2(img)
+    varis = ImageManager.calculate_variance(img)
+    devs = ImageManager.calculate_deviation(img)
+    ranges = ImageManager.calculate_range(img)
+    return (means[0], means[1], means[2], varis[0], varis[1], varis[2],
+                    devs[0], devs[1], devs[2], ranges[0], ranges[1], ranges[2],
+                    ImageManager.entropy(img))
 
 def slice_image(img, rows, columns):
     height, width, channels = img.shape
@@ -54,6 +62,27 @@ def calculate_means(img):
     B = numpy.mean(B)
     return [R, G, B]
 
+def calculate_variance(img):
+    B, G, R = cv2.split(img)
+    R = numpy.var(R)
+    G = numpy.var(G)
+    B = numpy.var(B)
+    return [R, G, B]
+
+def calculate_range(img):
+    B, G, R = cv2.split(img)
+    R = R.max() - R.min()
+    G = G.max() - G.min()
+    B = B.max() - B.min()
+    return [R,G,B]
+
+
+def calculate_deviation(img):
+    B, G, R = cv2.split(img)
+    R = numpy.std(R)
+    G = numpy.std(G)
+    B = numpy.std(B)
+    return [R, G, B]
 
 def calculate_means2(img):
     R = img[:, 0]

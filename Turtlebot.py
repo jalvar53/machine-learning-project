@@ -4,6 +4,7 @@ from SvmModel import SvmModel
 import ImageManager
 import numpy as np
 import cv2
+import time
 
 
 class Turtlebot:
@@ -16,15 +17,17 @@ class Turtlebot:
 
     def move(self,p):
         msg = Twist()
-        print("%d, %d, %d, %d" %(p[100],p[101],p[102],p[103]))
-        if(p[100]*p[101]*p[102]*p[103] > 0):
+        #print("%d, %d, %d, %d" %(p[100],p[101],p[102],p[103]))
+        print(p[84:96])
+        #if(p[100]*p[101]*p[102]*p[103] > 0):
+        if(p[88]*p[89]*p[90]*p[91] > 0):
             #msg.linear.x = 0.2
             #msg.angular.z = 0
             print("moverse alante")
         else:
             # msg.linear.x = 0
             # msg.angular.z = 0.2
-            print("girando girando girando pou lado")
+            print("hay obstaculo")
         # rate.sleep()
         # self.publisher.publish(msg)
 
@@ -40,7 +43,8 @@ if __name__ == '__main__':
     turtlebot.svm.load_model()
     #rate = rospy.Rate(10)
 
-    for i in range(10):
+    for i in range(50):
+        #t = time.time()
         img_name = 'assets/raw/frame' + str(int(i/1000))
         num = i%1000
         img_name += str(int(num/100))
@@ -50,15 +54,14 @@ if __name__ == '__main__':
         parts = ImageManager.slice_image(image,9,12)
         p=[]
         for j in range(108):
-            means = ImageManager.calculate_means(parts[j])
-            x = [means[0], means[1], means[2], int(ImageManager.entropy(parts[j]))]
-            p.append(int(turtlebot.svm.get_model().predict(np.asarray(x).reshape(1,4))))
+            x = ImageManager.retrieve_data(parts[j])
+            p.append(int(turtlebot.svm.get_model().predict(np.asarray(x).reshape(1,13))))
         #print(p)
         turtlebot.move(p)
         cv2.imshow(img_name , image)
         cv2.waitKey()
         cv2.destroyAllWindows()
-
+        #print("tiempo para ejemplo %d: %f" % (i,time.time()-t))
 
 
     # segments = ImageManager.slic_image(image,100)

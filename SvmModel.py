@@ -18,9 +18,7 @@ class SvmModel:
     def train_model_slic(self, image, mask, segments):
         for segment in np.unique(segments):
             img = image[segments == segment]
-            means = ImageManager.calculate_means2(img)
-
-            self.x.append((means[0], means[1], means[2], ImageManager.entropy(img)))
+            self.x.append(ImageManager.retrieve_data(img))
 
             img = mask[segments == segment]
             if np.mean(img) > 130:
@@ -36,9 +34,7 @@ class SvmModel:
 
     def calculate_data(self, parts, mask):
         for j in range(len(parts)):
-
-            means = ImageManager.calculate_means(parts[j])
-            self.x.append((means[0], means[1], means[2], ImageManager.entropy(parts[j])))
+            self.x.append(ImageManager.retrieve_data(parts[j]))
             self.y.append(ImageManager.calculate_y(mask,j))
 
     def train_model_slice(self):
@@ -82,7 +78,7 @@ class SvmModel:
 if __name__ == '__main__':
     print("Training the model")
     svm = SvmModel()
-    for i in range(51):
+    for i in range(101):
         img_name = 'assets/raw/frame' + str(int(i/1000))
         mask_name = 'assets/mask/frame' + str(int(i/1000))
         num = i%1000
