@@ -14,6 +14,20 @@ class Turtlebot:
         #rospy.on_shutdown(self.shutdown)
         self.svm = SvmModel()
         self.x = 0
+        self.pred=[]
+
+    def categories(self):
+        self.cats = [0,0,0,0,0,0,0,0,0,0,
+                     0,0,0,0,0,0,1,2,3,3,
+                     0,0,0,0,0,0,0,3,0,0,
+                     0,0,3,0,0,0,0,0,0,0,
+                     0,0,3,0,0,0,0,0,0,0,
+                     3,0,0,3,3,0,0,3,3,0,
+                     0,0,1,1,0,0,0,0,0,0,
+                     0,0,0,0,0,0,0,0,0,0,
+                     0,0,0,0,0,1,0,0,0,0,
+                     0,1,1,2,3,3,0,0,0,0]
+        return self.cats
 
     def move(self,p,s):
         msg = Twist()
@@ -27,34 +41,42 @@ class Turtlebot:
         if(central > 2):
             #msg.linear.x = 0.2
             #msg.angular.z = 0
+            self.pred.append(0)
             print("moverse alante")
         elif(left > 2 or lefts > 2):
             # msg.linear.x = 0
             # msg.angular.z = 0.2
+            self.pred.append(3)
             print("mover a la izquierda")
         elif(rigth > 2 or rigths > 2):
             # msg.linear.x = 0
             # msg.angular.z = -0.2
+            self.pred.append(1)
             print("mover a la derecha")
         elif(left > 1 or lefts > 1):
             # msg.linear.x = 0
             # msg.angular.z = 0.4
+            self.pred.append(3)
             print("mover a la izquierda")
         elif(rigth > 1 or rigths > 1):
             # msg.linear.x = 0
             # msg.angular.z = -0.4
+            self.pred.append(1)
             print("mover a la derecha")
         elif(left > 0 or lefts > 0):
             # msg.linear.x = 0
             # msg.angular.z = 0.8
+            self.pred.append(3)
             print("mover a la izquierda")
         elif(rigth > 0 or rigths > 0):
             # msg.linear.x = 0
             # msg.angular.z = -0.8
+            self.pred.append(1)
             print("mover a la derecha")
         else:
             # msg.linear.x = 0.2
             # msg.angular.z = 0
+            self.pred.append(2)
             print("metale reversa")
         # rate.sleep()
         # self.publisher.publish(msg)
@@ -70,8 +92,9 @@ if __name__ == '__main__':
     turtlebot = Turtlebot()
     turtlebot.svm.load_model()
     #rate = rospy.Rate(10)
-
-    for i in range(50):
+    performance = 0
+    #t=time.time()
+    for i in range(100):
         #t = time.time()
         img_name = 'assets/raw/frame' + str(int(i/1000))
         num = i%1000
@@ -86,12 +109,14 @@ if __name__ == '__main__':
             p.append(int(turtlebot.svm.get_model().predict(np.asarray(x).reshape(1,13))))
         #print(p)
         turtlebot.move(p,84)
+        if(turtlebot.pred[i]==turtlebot.categories()[i]):
+            performance += 1
         cv2.imshow(img_name , image)
         cv2.waitKey()
         cv2.destroyAllWindows()
         #print("tiempo para ejemplo %d: %f" % (i,time.time()-t))
-
-
+    print(performance)
+    #print(time.time()-t)
     # segments = ImageManager.slic_image(image,100)
     # turtlebot.svm.load_model()
     # mask = turtlebot.svm.predict(image, segments)
