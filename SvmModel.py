@@ -81,13 +81,12 @@ if __name__ == '__main__':
     for i in range(101):
         img_name = 'assets/raw/frame' + str(int(i/1000))
         mask_name = 'assets/mask/frame' + str(int(i/1000))
-        num = i%1000
+        num = i % 1000
         img_name += str(int(num/100))
         mask_name += str(int(num/100))
         num = num % 100
         img_name += str(int(num/10)) + str(int(num%10))
         mask_name += str(int(num/10)) + str(int(num%10))
-
         image = ImageManager.load_image(img_name)
         mask = ImageManager.load_image(mask_name)
         #segments = ImageManager.slic_image(image, 100)
