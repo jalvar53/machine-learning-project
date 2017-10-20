@@ -25,12 +25,12 @@ class Turtlebot:
                      0,0,0,0,0,0,0,0,0,0,
                      0,0,0,0,0,1,0,0,0,0,
                      0,1,1,2,3,3,0,0,0,0,
-                     1,1,1,1,1,1,1,1,1,1,
-                     1,1,1,1,1,1,1,1,1,1,
-                     1,1,1,1,1,1,2,2,2,2,
-                     2,2,2,1,1,1,1,1,4,4,
-                     4,1,1,2,2,1,1,1,1,1,
-                     4,4,2,2,1,1,1,1,1,1,1]
+                     0,0,0,0,0,0,0,0,0,0,
+                     0,0,0,0,0,0,0,0,0,0,
+                     0,0,0,0,0,0,1,1,1,1,
+                     1,1,0,0,0,0,0,0,3,3,
+                     3,0,1,1,1,0,0,0,0,0,
+                     3,3,1,1,0,0,0,0,0,0,0]
         return self.cats
 
     def move(self, p, s):
@@ -89,10 +89,8 @@ if __name__ == '__main__':
         p = []
         for j in range(84, 108):
             x = ImageManager.retrieve_data(parts[j])
-            print(x)
             p.append(int(turtlebot.svm.get_model().predict(np.asarray(x).reshape(1, len(x)))))
         turtlebot.move(p, 84)
-        #print(i)
         if turtlebot.pred[i-100]==turtlebot.categories()[i]:
             performance += 1
         cv2.imshow(img_name, image)
