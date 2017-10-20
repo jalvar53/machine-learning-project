@@ -73,30 +73,45 @@ def calculate_variance(img):
     return [R, G, B]
 
 def calculate_range(img):
-    B, G, R = cv2.split(img)
-    R = R.max() - R.min()
-    G = G.max() - G.min()
-    B = B.max() - B.min()
-    if(R.max() > 1):
-        R = float(R/R.max())
-    if(G.max() > 1):
-        G = float(G/G.max())
-    if(B.max() > 1):
-        B = float(B/B.max())
+    Bi, Gi, Ri = cv2.split(img)
+    R = (Ri.max() - Ri.min())/255.0
+    G = (Gi.max() - Gi.min())/255.0
+    B = (Bi.max() - Bi.min())/255.0
+
+    #*************************cambie esto para que fuera el mayor rango posible
+    #con el if(Ri.max()>1): R = R/float(Ri.max()) funcionaba un poco mejor
+
+    # if(R > 1):
+    #     R = R/float(Ri.max())
+    # if(G > 1):
+    #     G = G/float(Gi.max())
+    # if(B > 1):
+    #     B = B/float(Bi.max())
+
+    # if(Ri.max() > 0):
+    #     R = R/float(Ri.max())
+    # else:
+    #     R = R/0.0000000000000000000000000000000001
+    # if(Gi.max() > 0):
+    #     G = G/float(Gi.max())
+    # else:
+    #     G = G/0.0000000000000000000000000000000001
+    # if(B.max() > 1):
+    #     B = B/float(Bi.max())
     return [R,G,B]
 
 
 def calculate_deviation(img):
-    B, G, R = cv2.split(img)
-    R = numpy.std(R)
-    G = numpy.std(G)
-    B = numpy.std(B)
+    Bi, Gi, Ri = cv2.split(img)
+    R = numpy.std(Ri)
+    G = numpy.std(Gi)
+    B = numpy.std(Bi)
     if(R.max() > 1):
-        R = R/R.max()
+        R = R/Ri.max()
     if(G.max() > 1):
-        G = G/G.max()
+        G = G/Gi.max()
     if(B.max() > 1):
-        B = B/B.max()
+        B = B/Bi.max()
     return [R, G, B]
 
 def calculate_means2(img):
