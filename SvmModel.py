@@ -50,17 +50,17 @@ class SvmModel:
     def load_model(self):
         self.model = joblib.load('model.pkl')
 
-    def predict(self, image, segments):
-
-        self.x = []
-        for segment in np.unique(segments):
-            img = image[segments == segment]
-            means = ImageManager.calculate_means2(img)
-            self.x.append((means[0], means[1], means[2], ImageManager.entropy(img)))
-
-        self.x = np.asarray(self.x)
-        msk = self.model.predict(self.x)
-        return msk
+    # def predict(self, image, segments):
+    #
+    #     self.x = []
+    #     for segment in np.unique(segments):
+    #         img = image[segments == segment]
+    #         means = ImageManager.calculate_means2(img)
+    #         self.x.append((means[0], means[1], means[2], ImageManager.entropy(img)))
+    #
+    #     self.x = np.asarray(self.x)
+    #     msk = self.model.predict(self.x)
+    #     return msk
 
     def get_x_y(self):
         return [self.x, self.y]

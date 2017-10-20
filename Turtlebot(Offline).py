@@ -24,7 +24,13 @@ class Turtlebot:
                      0,0,1,1,0,0,0,0,0,0,
                      0,0,0,0,0,0,0,0,0,0,
                      0,0,0,0,0,1,0,0,0,0,
-                     0,1,1,2,3,3,0,0,0,0]
+                     0,1,1,2,3,3,0,0,0,0,
+                     1,1,1,1,1,1,1,1,1,1,
+                     1,1,1,1,1,1,1,1,1,1,
+                     1,1,1,1,1,1,2,2,2,2,
+                     2,2,2,1,1,1,1,1,4,4,
+                     4,1,1,2,2,1,1,1,1,1,
+                     4,4,2,2,1,1,1,1,1,1,1]
         return self.cats
 
     def move(self, p, s):
@@ -71,7 +77,7 @@ if __name__ == '__main__':
     turtlebot = Turtlebot()
     turtlebot.svm.load_model()
     performance = 0
-    for i in range(100):
+    for i in range(100,150):
         img_name = 'assets/raw/frame' + str(int(i/1000))
         num = i%1000
         img_name += str(int(num/100))
@@ -83,9 +89,11 @@ if __name__ == '__main__':
         p = []
         for j in range(84, 108):
             x = ImageManager.retrieve_data(parts[j])
-            p.append(int(turtlebot.svm.get_model().predict(np.asarray(x).reshape(1, 13))))
+            print(x)
+            p.append(int(turtlebot.svm.get_model().predict(np.asarray(x).reshape(1, len(x)))))
         turtlebot.move(p, 84)
-        if turtlebot.pred[i]==turtlebot.categories()[i]:
+        #print(i)
+        if turtlebot.pred[i-100]==turtlebot.categories()[i]:
             performance += 1
         cv2.imshow(img_name, image)
         cv2.waitKey()

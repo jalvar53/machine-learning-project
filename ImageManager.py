@@ -26,6 +26,9 @@ def retrieve_data(img):
     return (means[0], means[1], means[2], varis[0], varis[1], varis[2],
                     devs[0], devs[1], devs[2], ranges[0], ranges[1], ranges[2],
                     ImageManager.entropy(img))
+    # return (means[0], means[1], means[2], devs[0], devs[1], devs[2],
+    #                 ImageManager.entropy(img))
+
 
 def slice_image(img, rows, columns):
     height, width, channels = img.shape
@@ -64,9 +67,9 @@ def calculate_means(img):
 
 def calculate_variance(img):
     B, G, R = cv2.split(img)
-    R = numpy.var(R)
-    G = numpy.var(G)
-    B = numpy.var(B)
+    R = numpy.var(R)/2000
+    G = numpy.var(G)/2000
+    B = numpy.var(B)/2000
     return [R, G, B]
 
 def calculate_range(img):
@@ -74,6 +77,12 @@ def calculate_range(img):
     R = R.max() - R.min()
     G = G.max() - G.min()
     B = B.max() - B.min()
+    if(R.max() > 1):
+        R = float(R/R.max())
+    if(G.max() > 1):
+        G = float(G/G.max())
+    if(B.max() > 1):
+        B = float(B/B.max())
     return [R,G,B]
 
 
@@ -82,15 +91,21 @@ def calculate_deviation(img):
     R = numpy.std(R)
     G = numpy.std(G)
     B = numpy.std(B)
+    if(R.max() > 1):
+        R = R/R.max()
+    if(G.max() > 1):
+        G = G/G.max()
+    if(B.max() > 1):
+        B = B/B.max()
     return [R, G, B]
 
 def calculate_means2(img):
     R = img[:, 0]
     G = img[:, 1]
     B = img[:, 2]
-    R = numpy.mean(R)
-    G = numpy.mean(G)
-    B = numpy.mean(B)
+    R = numpy.mean(R)/127
+    G = numpy.mean(G)/127
+    B = numpy.mean(B)/127
     return [R, G, B]
 
 def calculate_y(mask,j):
@@ -119,4 +134,4 @@ def entropy(img):
 
     if noise == 0:
         noise = 1e-310
-    return noise
+    return noise/20
