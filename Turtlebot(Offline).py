@@ -13,9 +13,7 @@ class Turtlebot:
         self.svm = SvmModel()
         self.x = 0
         self.pred=[]
-
-    def categories(self):
-        self.cats = [0,0,0,0,0,0,0,0,0,0,
+        self.exp = [0,0,0,0,0,0,0,0,0,0,
                      0,0,0,0,0,0,1,2,3,3,
                      0,0,0,0,0,0,0,3,0,0,
                      0,0,3,0,0,0,0,0,0,0,
@@ -31,7 +29,9 @@ class Turtlebot:
                      1,1,0,0,0,0,0,0,3,3,
                      3,0,1,1,1,0,0,0,0,0,
                      3,3,1,1,0,0,0,0,0,0,0]
-        return self.cats
+
+    def get_desired_values(self):
+        return self.exp
 
     def move(self, p, s):
         msg = Twist()
@@ -77,7 +77,12 @@ if __name__ == '__main__':
     turtlebot = Turtlebot()
     turtlebot.svm.load_model()
     performance = 0
-    for i in range(160):
+    band = False
+    start = 0
+    for i in range(100,160):
+        if(not band):
+            start = i
+            band = True
         img_name = 'assets/raw/frame' + str(int(i/1000))
         num = i%1000
         img_name += str(int(num/100))
@@ -92,9 +97,9 @@ if __name__ == '__main__':
             #print(x)
             p.append(int(turtlebot.svm.get_model().predict(np.asarray(x).reshape(1, len(x)))))
         turtlebot.move(p, 84)
-        if turtlebot.pred[i]==turtlebot.categories()[i]:
+        if turtlebot.pred[i-start]==turtlebot.get_desired_values()[i]:
             performance += 1
-        # cv2.imshow(img_name, image)
-        # cv2.waitKey()
-        # cv2.destroyAllWindows()
-    print(performance)
+        cv2.imshow(img_name, image)
+        cv2.waitKey()
+        cv2.destroyAllWindows()
+    print("good ones: %d" %(performance))

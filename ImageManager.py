@@ -26,8 +26,6 @@ def retrieve_data(img):
     return (means[0], means[1], means[2], varis[0], varis[1], varis[2],
                     devs[0], devs[1], devs[2], ranges[0], ranges[1], ranges[2],
                     ImageManager.entropy(img))
-    # return (means[0], means[1], means[2], devs[0], devs[1], devs[2],
-    #                 ImageManager.entropy(img))
 
 
 def slice_image(img, rows, columns):
@@ -78,26 +76,6 @@ def calculate_range(img):
     G = (Gi.max() - Gi.min())/255.0
     B = (Bi.max() - Bi.min())/255.0
 
-    #*************************cambie esto para que fuera el mayor rango posible
-    #con el if(Ri.max()>1): R = R/float(Ri.max()) funcionaba un poco mejor
-
-    # if(R > 1):
-    #     R = R/float(Ri.max())
-    # if(G > 1):
-    #     G = G/float(Gi.max())
-    # if(B > 1):
-    #     B = B/float(Bi.max())
-
-    # if(Ri.max() > 0):
-    #     R = R/float(Ri.max())
-    # else:
-    #     R = R/0.0000000000000000000000000000000001
-    # if(Gi.max() > 0):
-    #     G = G/float(Gi.max())
-    # else:
-    #     G = G/0.0000000000000000000000000000000001
-    # if(B.max() > 1):
-    #     B = B/float(Bi.max())
     return [R,G,B]
 
 
