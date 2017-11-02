@@ -1,8 +1,9 @@
 from skimage.segmentation import slic
+from skimage.segmentation import mark_boundaries
 import ImageManager
 import ImageStat
 import Image
-import numpy
+import numpy as np
 import sys
 import cv2
 import os
@@ -19,7 +20,7 @@ def load_image(img_title):
     return img
 
 def retrieve_data(img):
-    means = ImageManager.calculate_means2(img)
+    means = ImageManager.calculate_means(img)
     varis = ImageManager.calculate_variance(img)
     devs = ImageManager.calculate_deviation(img)
     ranges = ImageManager.calculate_range(img)
@@ -27,6 +28,14 @@ def retrieve_data(img):
                     devs[0], devs[1], devs[2], ranges[0], ranges[1], ranges[2],
                     ImageManager.entropy(img))
 
+def retrieve_data2(img):
+    means = ImageManager.calculate_means(img)
+    varis = ImageManager.calculate_variance2(img)
+    devs = ImageManager.calculate_deviation2(img)
+    ranges = ImageManager.calculate_range2(img)
+    return (means[0], means[1], means[2], varis[0], varis[1], varis[2],
+                    devs[0], devs[1], devs[2], ranges[0], ranges[1], ranges[2],
+                    ImageManager.entropy(img))
 
 def slice_image(img, rows, columns):
     height, width, channels = img.shape
@@ -43,31 +52,47 @@ def slice_image(img, rows, columns):
     return parts
 
 
-def slic_image(img, parts):
-    segments = slic(img, n_segments=parts, sigma=5)
-    return segments
+def slic_image(img, rows, columns):
+    n = rows*columns
+    segments = slic(img, n_segments=100, sigma=5)
+    parts = range(n)
+    for (i, segVal) in enumerate(np.unique(segments)):
+        parts[i]=img[segments==segVal]
+    # cv2.imshow("superpixels", mark_boundaries(img,segments))
+    # cv2.waitKey()
+    # cv2.destroyAllWindows()
+    return [parts,segments]
 
 
 def normalized_means(img):
     B, G, R = cv2.split(img)
-    R = numpy.mean(R / (R + G + B))
-    G = numpy.mean(G / (R + G + B))
-    B = numpy.mean(B / (R + G + B))
+    R = np.mean(R / (R + G + B))
+    G = np.mean(G / (R + G + B))
+    B = np.mean(B / (R + G + B))
     return [R, G, B]
 
 
-def calculate_means(img):
-    B, G, R = cv2.split(img)
-    R = numpy.mean(R)
-    G = numpy.mean(G)
-    B = numpy.mean(B)
-    return [R, G, B]
+# def calculate_means(img):
+#     B, G, R = cv2.split(img)
+#     R = np.mean(R)
+#     G = np.mean(G)
+#     B = np.mean(B)
+#     return [R, G, B]
 
 def calculate_variance(img):
     B, G, R = cv2.split(img)
-    R = numpy.var(R)/2000
-    G = numpy.var(G)/2000
-    B = numpy.var(B)/2000
+    R = np.var(R)/2000
+    G = np.var(G)/2000
+    B = np.var(B)/2000
+    return [R, G, B]
+
+def calculate_variance2(img):
+    R = img[:, 0]
+    G = img[:, 1]
+    B = img[:, 2]
+    R = np.var(R)/2000
+    G = np.var(G)/2000
+    B = np.var(B)/2000
     return [R, G, B]
 
 def calculate_range(img):
@@ -75,15 +100,22 @@ def calculate_range(img):
     R = (Ri.max() - Ri.min())/255.0
     G = (Gi.max() - Gi.min())/255.0
     B = (Bi.max() - Bi.min())/255.0
-
     return [R,G,B]
 
+def calculate_range2(img):
+    Ri = img[:, 0]
+    Gi = img[:, 1]
+    Bi = img[:, 2]
+    R = (Ri.max() - Ri.min())/255.0
+    G = (Gi.max() - Gi.min())/255.0
+    B = (Bi.max() - Bi.min())/255.0
+    return [R,G,B]
 
 def calculate_deviation(img):
     Bi, Gi, Ri = cv2.split(img)
-    R = numpy.std(Ri)
-    G = numpy.std(Gi)
-    B = numpy.std(Bi)
+    R = np.std(Ri)
+    G = np.std(Gi)
+    B = np.std(Bi)
     if(R.max() > 1):
         R = R/Ri.max()
     if(G.max() > 1):
@@ -92,17 +124,35 @@ def calculate_deviation(img):
         B = B/Bi.max()
     return [R, G, B]
 
-def calculate_means2(img):
+def calculate_deviation2(img):
+    Ri = img[:, 0]
+    Gi = img[:, 1]
+    Bi = img[:, 2]
+    R = np.std(Ri)
+    G = np.std(Gi)
+    B = np.std(Bi)
+    if(R.max() > 1):
+        R = R/Ri.max()
+    if(G.max() > 1):
+        G = G/Gi.max()
+    if(B.max() > 1):
+        B = B/Bi.max()
+    return [R, G, B]
+
+def calculate_means(img):
     R = img[:, 0]
     G = img[:, 1]
     B = img[:, 2]
-    R = numpy.mean(R)/127
-    G = numpy.mean(G)/127
-    B = numpy.mean(B)/127
+    R = np.mean(R)/127
+    G = np.mean(G)/127
+    B = np.mean(B)/127
     return [R, G, B]
 
 def calculate_y(mask,j):
-    return numpy.mean(mask[int(j / 12) * 53:(int(j / 12) + 1) * 53, j % 12 * 53:((j % 12) + 1) * 53, :]) > 130
+    return np.mean(mask[int(j / 12) * 53:(int(j / 12) + 1) * 53, j % 12 * 53:((j % 12) + 1) * 53, :]) > 130
+
+def calculate_y2(mask,segVal, segments):
+    return np.mean(mask[segVal==segments]) > 130
 
 
 def entropy(img):

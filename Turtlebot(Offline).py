@@ -82,10 +82,18 @@ class Turtlebot:
                 self.imageBaW[int(i/12) * height:(int(i/12) + 1) * height, int(i%12) * width:(int(i%12) + 1) * width]=255
             else:
                 self.imageBaW[int(i/12) * height:(int(i/12) + 1) * height, int(i%12) * width:(int(i%12) + 1) * width]=0
-        print(self.imageBaW)
-        cv2.imshow("aca", self.imageBaW)
+        cv2.imshow("debug", self.imageBaW)
         cv2.waitKey()
-        cv2.destroyAllWindows()
+
+    def debug2(self, p, image, segments):
+        self.imageBaW = np.zeros((image.shape))
+        for (i, segVal) in enumerate(np.unique(segments)):
+            if(p[i]):
+                self.imageBaW[segments==segVal]=255
+            else:
+                self.imageBaW[segments==segVal]=0
+        cv2.imshow("debug2", self.imageBaW)
+        cv2.waitKey()
 
 if __name__ == '__main__':
     turtlebot = Turtlebot()
@@ -93,7 +101,7 @@ if __name__ == '__main__':
     performance = 0
     band = False
     start = 0
-    for i in range(100,110):
+    for i in range(100,101):
         if(not band):
             start = i
             band = True
@@ -103,17 +111,22 @@ if __name__ == '__main__':
         num = num % 100
         img_name += str(int(num/10)) + str(int(num%10))
         image = ImageManager.load_image(img_name)
-        parts = ImageManager.slice_image(image, 9, 12)
-        type(image)
-        p = []
+        #parts = ImageManager.slice_image(image, 9, 12)
+        parts2,segments = ImageManager.slic_image(image, 9, 12)
+        #type(image)
+        #p = []
+        p2 = []
         for j in range(108):
-            x = ImageManager.retrieve_data(parts[j])
-            #print(x)
-            p.append(int(turtlebot.svm.get_model().predict(np.asarray(x).reshape(1, len(x)))))
-        turtlebot.move(p, 0)
+            #x = ImageManager.retrieve_data(parts[j])
+            x2 = ImageManager.retrieve_data2(parts2[j])
+            #p.append(int(turtlebot.svm.get_model().predict(np.asarray(x).reshape(1, len(x)))))
+            p2.append(int(turtlebot.svm.get_model().predict(np.asarray(x2).reshape(1, len(x2)))))
+        turtlebot.move(p2, 0)
         if turtlebot.pred[i-start]==turtlebot.get_desired_values()[i]:
             performance += 1
         cv2.imshow(img_name, image)
         cv2.waitKey()
-        turtlebot.debug(p, image)
+        #turtlebot.debug(p, image)
+        turtlebot.debug2(p2, image, segments)
+        cv2.destroyAllWindows()
     print("good ones: %d" %(performance))
