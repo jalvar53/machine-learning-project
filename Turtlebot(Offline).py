@@ -72,6 +72,20 @@ class Turtlebot:
         self.publisher.publish(Twist())
         rospy.sleep(1)
 
+    def debug(self, p, image):
+        self.imageBaW = image[:,:,:]
+        height, width, channels = self.imageBaW.shape
+        height = height / 9
+        width = width / 12
+        for i in range(len(p)):
+            if(p[i]):
+                self.imageBaW[int(i/12) * height:(int(i/12) + 1) * height, int(i%12) * width:(int(i%12) + 1) * width]=255
+            else:
+                self.imageBaW[int(i/12) * height:(int(i/12) + 1) * height, int(i%12) * width:(int(i%12) + 1) * width]=0
+        print(self.imageBaW)
+        cv2.imshow("aca", self.imageBaW)
+        cv2.waitKey()
+        cv2.destroyAllWindows()
 
 if __name__ == '__main__':
     turtlebot = Turtlebot()
@@ -79,7 +93,7 @@ if __name__ == '__main__':
     performance = 0
     band = False
     start = 0
-    for i in range(100,160):
+    for i in range(100,110):
         if(not band):
             start = i
             band = True
@@ -92,14 +106,14 @@ if __name__ == '__main__':
         parts = ImageManager.slice_image(image, 9, 12)
         type(image)
         p = []
-        for j in range(84, 108):
+        for j in range(108):
             x = ImageManager.retrieve_data(parts[j])
             #print(x)
             p.append(int(turtlebot.svm.get_model().predict(np.asarray(x).reshape(1, len(x)))))
-        turtlebot.move(p, 84)
+        turtlebot.move(p, 0)
         if turtlebot.pred[i-start]==turtlebot.get_desired_values()[i]:
             performance += 1
         cv2.imshow(img_name, image)
         cv2.waitKey()
-        cv2.destroyAllWindows()
+        turtlebot.debug(p, image)
     print("good ones: %d" %(performance))

@@ -30,7 +30,7 @@ class Turtlebot:
                      0, 0, 1, 1, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-                     0, 1, 1, 2, 3, 3, 0, 0, 0, 0
+                     0, 1, 1, 2, 3, 3, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
@@ -106,6 +106,20 @@ class Turtlebot:
         self.image_received = True
         self.image = cv_image
 
+def debug(self, p, image):
+    self.imageBaW = image[:,:,:]
+    height, width, channels = self.imageBaW.shape
+    height = height / 9
+    width = width / 12
+    for i in range(len(p)):
+        if(p[i]):
+            self.imageBaW[int(i/12) * height:(int(i/12) + 1) * height, int(i%12) * width:(int(i%12) + 1) * width]=255
+        else:
+            self.imageBaW[int(i/12) * height:(int(i/12) + 1) * height, int(i%12) * width:(int(i%12) + 1) * width]=0
+    print(self.imageBaW)
+    cv2.imshow("aca", self.imageBaW)
+    cv2.waitKey()
+    cv2.destroyAllWindows()
 
 if __name__ == '__main__':
     turtlebot = Turtlebot()
@@ -118,7 +132,7 @@ if __name__ == '__main__':
         image = turtlebot.image
         cv2.imshow("whate", turtlebot.image)
         cv2.waitKey(5000)
-        cv2.destroyAllWindows()
+        #cv2.destroyAllWindows()
         parts = ImageManager.slice_image(turtlebot.image, 9, 12)
         p = []
         for j in range(84, 108):
@@ -126,3 +140,4 @@ if __name__ == '__main__':
             p.append(int(turtlebot.svm.get_model().predict(np.asarray(x).reshape(1, 13))))
         # print(p)
         turtlebot.move(p, 84)
+        turtlebot.debug(p, turtlebot.image)
