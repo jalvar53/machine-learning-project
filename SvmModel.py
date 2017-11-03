@@ -32,9 +32,9 @@ class SvmModel:
         self.model.fit(self.x, self.y.reshape((self.x.shape[0])))
 
 
-    def calculate_data(self, parts, mask):
+    def calculate_data(self, parts, parts_hsv, mask):
         for j in range(len(parts)):
-            self.x.append(ImageManager.retrieve_data(parts[j]))
+            self.x.append(ImageManager.retrieve_data(parts[j], parts_hsv[j]))
             self.y.append(ImageManager.calculate_y(mask,j))
 
     def calculate_data2(self, parts, parts_hsv, mask, segments):
@@ -86,8 +86,8 @@ if __name__ == '__main__':
         #segments = ImageManager.slic_image(image, 100)
 
         ##diciendo imagen en cuadros
-        #parts = ImageManager.slice_image(image,9,12)
-        #svm.calculate_data(parts, mask)
+        # parts,parts_hsv = ImageManager.slice_image(image,9,12)
+        # svm.calculate_data(parts, parts_hsv, mask)
 
         ##con superpixeles
         parts, parts_hsv, segments = ImageManager.slic_image(image,9,12)

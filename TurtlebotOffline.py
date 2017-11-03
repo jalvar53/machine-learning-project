@@ -82,6 +82,8 @@ class Turtlebot:
                 self.imageBaW[int(i/12) * height:(int(i/12) + 1) * height, int(i%12) * width:(int(i%12) + 1) * width]=255
             else:
                 self.imageBaW[int(i/12) * height:(int(i/12) + 1) * height, int(i%12) * width:(int(i%12) + 1) * width]=0
+        cv2.namedWindow("debug");
+        cv2.moveWindow("debug", 710,20);
         cv2.imshow("debug", self.imageBaW)
 
     def debug2(self, p, image, segments):
@@ -91,7 +93,9 @@ class Turtlebot:
                 self.imageBaW[segments==segVal]=255
             else:
                 self.imageBaW[segments==segVal]=0
-        cv2.imshow("debug2", self.imageBaW)
+        cv2.namedWindow("debug");
+        cv2.moveWindow("debug", 710,20);
+        cv2.imshow("debug", self.imageBaW)
 
 if __name__ == '__main__':
     turtlebot = Turtlebot()
@@ -99,7 +103,7 @@ if __name__ == '__main__':
     performance = 0
     band = False
     start = 0
-    for i in range(161):
+    for i in range(11):
         #***********implementacion diviendo la imagen en cuadros*******************
         # if(not band):
         #     start = i
@@ -110,14 +114,16 @@ if __name__ == '__main__':
         # num = num % 100
         # img_name += str(int(num/10)) + str(int(num%10))
         # image = ImageManager.load_image(img_name)
-        # parts = ImageManager.slice_image(image, 9, 12)
+        # parts,parts_hsv = ImageManager.slice_image(image, 9, 12)
         # p = []
         # for j in range(108):
-        #     x = ImageManager.retrieve_data(parts[j])
+        #     x = ImageManager.retrieve_data(parts[j],parts_hsv[j])
         #     p.append(int(turtlebot.svm.get_model().predict(np.asarray(x).reshape(1, len(x)))))
         # turtlebot.move(p, 0)
         # if turtlebot.pred[i-start]==turtlebot.get_desired_values()[i]:
         #     performance += 1
+        # cv2.namedWindow(img_name);
+        # cv2.moveWindow(img_name, 20,20);
         # cv2.imshow(img_name, image)
         # turtlebot.debug(p, image)
         # cv2.waitKey()
@@ -143,10 +149,12 @@ if __name__ == '__main__':
         turtlebot.move(p2, 0)
         if turtlebot.pred[i-start]==turtlebot.get_desired_values()[i]:
             performance += 1
-        #cv2.imshow(img_name, image)
+        cv2.namedWindow(img_name);
+        cv2.moveWindow(img_name, 710,280);
+        cv2.imshow(img_name, image)
         print("tiempo: %f" % (time.time()-t))
         #turtlebot.debug2(p2, image, segments)
-        #cv2.waitKey()
-        #cv2.destroyAllWindows()
+        cv2.waitKey()
+        cv2.destroyAllWindows()
 
     print("good ones: %d" %(performance))

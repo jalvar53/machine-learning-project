@@ -19,12 +19,15 @@ def load_image(img_title):
     #cv2.destroyAllWindows()
     return img
 
-def retrieve_data(img):
+def retrieve_data(img, img_hsv):
     means = ImageManager.calculate_means(img)
     devs = ImageManager.calculate_deviation(img)
     ranges = ImageManager.calculate_range(img)
-    return (means[0], means[1], means[2],
-                    devs[0], devs[1], devs[2], ranges[0], ranges[1], ranges[2],
+    means_hsv = ImageManager.calculate_means(img_hsv)
+    devs_hsv = ImageManager.calculate_deviation2(img_hsv)
+    ranges_hsv = ImageManager.calculate_range2(img_hsv)
+    return (means[0], means[1], means[2], devs[0], devs[1], devs[2], ranges[0], ranges[1], ranges[2],
+            means_hsv[0], means_hsv[1], means_hsv[2], devs_hsv[0], devs_hsv[1], devs_hsv[2], ranges_hsv[0], ranges_hsv[1], ranges_hsv[2],
                     ImageManager.entropy(img))
 
 def retrieve_data2(img, img_hsv):
@@ -39,18 +42,20 @@ def retrieve_data2(img, img_hsv):
             ImageManager.entropy(img))
 
 def slice_image(img, rows, columns):
+    img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     height, width, channels = img.shape
     height = height / rows
     width = width / columns
     parts=[]
-
+    parts_hsv=[]
     for i in range(0, rows):
 
         for j in range(0, columns):
 
             parts.append(img[i * height:(i + 1) * height, j * width:(j + 1) * width])
+            parts_hsv.append(img_hsv[i * height:(i + 1) * height, j * width:(j + 1) * width])
 
-    return parts
+    return [parts, parts_hsv]
 
 
 def slic_image(img, rows, columns):
@@ -62,7 +67,9 @@ def slic_image(img, rows, columns):
     for (i, segVal) in enumerate(np.unique(segments)):
         parts[i]=img[segments==segVal]
         parts_hsv[i]=img_hsv[segments==segVal]
-    #cv2.imshow("superpixels", mark_boundaries(img,segments))
+    cv2.namedWindow("superpixels");
+    cv2.moveWindow("superpixels", 20,20);
+    cv2.imshow("superpixels", mark_boundaries(img,segments))
     # cv2.waitKey()
     # cv2.destroyAllWindows()
     return [parts,parts_hsv,segments]
