@@ -37,10 +37,10 @@ class SvmModel:
             self.x.append(ImageManager.retrieve_data(parts[j]))
             self.y.append(ImageManager.calculate_y(mask,j))
 
-    def calculate_data2(self, parts, mask, segments):
+    def calculate_data2(self, parts, parts_hsv, mask, segments):
         #for j in range(len(parts)):
         for (j, segVal) in enumerate(np.unique(segments)):
-            self.x.append(ImageManager.retrieve_data2(parts[j]))
+            self.x.append(ImageManager.retrieve_data2(parts[j],parts_hsv[j]))
             self.y.append(ImageManager.calculate_y2(mask, segVal, segments))
 
     def train_model_slice(self):
@@ -90,7 +90,7 @@ if __name__ == '__main__':
         #svm.calculate_data(parts, mask)
 
         ##con superpixeles
-        parts,segments = ImageManager.slic_image(image,9,12)
-        svm.calculate_data2(parts, mask, segments)
+        parts, parts_hsv, segments = ImageManager.slic_image(image,9,12)
+        svm.calculate_data2(parts, parts_hsv, mask, segments)
     svm.train_model_slice()
     svm.save_model()

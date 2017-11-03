@@ -99,7 +99,7 @@ if __name__ == '__main__':
     performance = 0
     band = False
     start = 0
-    for i in range(20):
+    for i in range(161):
         #***********implementacion diviendo la imagen en cuadros*******************
         # if(not band):
         #     start = i
@@ -123,7 +123,9 @@ if __name__ == '__main__':
         # cv2.waitKey()
         # cv2.destroyAllWindows()
 
+
         #******************implementacion con superpixeles**************************
+        t=time.time()
         if(not band):
             start = i
             band = True
@@ -133,22 +135,18 @@ if __name__ == '__main__':
         num = num % 100
         img_name += str(int(num/10)) + str(int(num%10))
         image = ImageManager.load_image(img_name)
-        #parts = ImageManager.slice_image(image, 9, 12)
-        parts2,segments = ImageManager.slic_image(image, 9, 12)
-        #type(image)
-        #p = []
+        parts2,parts2_hsv,segments = ImageManager.slic_image(image, 9, 12)
         p2 = []
         for j in range(108):
-            #x = ImageManager.retrieve_data(parts[j])
-            x2 = ImageManager.retrieve_data2(parts2[j])
-            #p.append(int(turtlebot.svm.get_model().predict(np.asarray(x).reshape(1, len(x)))))
+            x2 = ImageManager.retrieve_data2(parts2[j],parts2_hsv[j])
             p2.append(int(turtlebot.svm.get_model().predict(np.asarray(x2).reshape(1, len(x2)))))
         turtlebot.move(p2, 0)
         if turtlebot.pred[i-start]==turtlebot.get_desired_values()[i]:
             performance += 1
         #cv2.imshow(img_name, image)
-        turtlebot.debug2(p2, image, segments)
-        cv2.waitKey()
-        cv2.destroyAllWindows()
+        print("tiempo: %f" % (time.time()-t))
+        #turtlebot.debug2(p2, image, segments)
+        #cv2.waitKey()
+        #cv2.destroyAllWindows()
 
     print("good ones: %d" %(performance))
