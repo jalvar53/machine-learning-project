@@ -101,7 +101,7 @@ if __name__ == '__main__':
     performance = 0
     band = False
     start = 0
-    for i in range(100,101):
+    for i in range(100,110):
         if(not band):
             start = i
             band = True
