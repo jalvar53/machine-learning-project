@@ -58,7 +58,7 @@ def slic_image(img, rows, columns):
     parts = range(n)
     for (i, segVal) in enumerate(np.unique(segments)):
         parts[i]=img[segments==segVal]
-    # cv2.imshow("superpixels", mark_boundaries(img,segments))
+    cv2.imshow("superpixels", mark_boundaries(img,segments))
     # cv2.waitKey()
     # cv2.destroyAllWindows()
     return [parts,segments]

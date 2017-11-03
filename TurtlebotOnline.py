@@ -116,10 +116,16 @@ def debug(self, p, image):
             self.imageBaW[int(i/12) * height:(int(i/12) + 1) * height, int(i%12) * width:(int(i%12) + 1) * width]=255
         else:
             self.imageBaW[int(i/12) * height:(int(i/12) + 1) * height, int(i%12) * width:(int(i%12) + 1) * width]=0
-    print(self.imageBaW)
-    cv2.imshow("aca", self.imageBaW)
-    cv2.waitKey()
-    cv2.destroyAllWindows()
+    cv2.imshow("debug", self.imageBaW)
+
+def debug2(self, p, image, segments):
+    self.imageBaW = np.zeros((image.shape))
+    for (i, segVal) in enumerate(np.unique(segments)):
+        if(p[i]):
+            self.imageBaW[segments==segVal]=255
+        else:
+            self.imageBaW[segments==segVal]=0
+    cv2.imshow("debug2", self.imageBaW)
 
 if __name__ == '__main__':
     turtlebot = Turtlebot()
@@ -129,15 +135,34 @@ if __name__ == '__main__':
     while not turtlebot.image_received:
         pass
     while not rospy.is_shutdown():
+        ##implementacion diviendo imagen en cuadros
+        # image = turtlebot.image
+        # cv2.imshow("whate", turtlebot.image)
+        # #cv2.waitKey(5000)
+        # #cv2.destroyAllWindows()
+        # parts = ImageManager.slice_image(turtlebot.image, 9, 12)
+        # p = []
+        # for j in range(84, 108):
+        #     x = ImageManager.retrieve_data(parts[j])
+        #     p.append(int(turtlebot.svm.get_model().predict(np.asarray(x).reshape(1, 13))))
+        # # print(p)
+        # turtlebot.move(p, 84)
+        # turtlebot.debug(p, turtlebot.image)
+        # cv2.waitKey(5000)
+        # cv2.destroyAllWindows()
+
+        ##implementacion de superpixeles
         image = turtlebot.image
         cv2.imshow("whate", turtlebot.image)
-        cv2.waitKey(5000)
+        #cv2.waitKey(5000)
         #cv2.destroyAllWindows()
-        parts = ImageManager.slice_image(turtlebot.image, 9, 12)
-        p = []
+        parts2,segments = ImageManager.slic_image(turtlebot.image, 9, 12)
+        p2 = []
         for j in range(84, 108):
-            x = ImageManager.retrieve_data(parts[j])
-            p.append(int(turtlebot.svm.get_model().predict(np.asarray(x).reshape(1, 13))))
+            x2 = ImageManager.retrieve_data2(parts2[j])
+            p2.append(int(turtlebot.svm.get_model().predict(np.asarray(x2).reshape(1, 13))))
         # print(p)
-        turtlebot.move(p, 84)
-        turtlebot.debug(p, turtlebot.image)
+        turtlebot.move(p2, 84)
+        turtlebot.debug2(p2, turtlebot.image, segments)
+        cv2.waitKey(5000)
+        cv2.destroyAllWindows()

@@ -85,11 +85,12 @@ if __name__ == '__main__':
         mask = ImageManager.load_image(mask_name)
         #segments = ImageManager.slic_image(image, 100)
 
-
+        ##diciendo imagen en cuadros
         #parts = ImageManager.slice_image(image,9,12)
-        parts,segments = ImageManager.slic_image(image,9,12)
+        #svm.calculate_data(parts, mask)
 
-        #svm.train_model_slic(image, mask, segments)
+        ##con superpixeles
+        parts,segments = ImageManager.slic_image(image,9,12)
         svm.calculate_data2(parts, mask, segments)
     svm.train_model_slice()
     svm.save_model()
