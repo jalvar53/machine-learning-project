@@ -12,7 +12,7 @@ from math import log
 
 def load_image(img_title):
     path = img_title + '.jpg'
-    print(path)
+    print("\n" + path)
     img = cv2.imread(path, -1)
     imgBaW = cv2.imread(path, 0)
     #cv2.imshow("Image" + img_title, img)
@@ -27,25 +27,25 @@ def retrieve_data(img, img_hsv, img_BaW):
     means_hsv = ImageManager.calculate_means(img_hsv)
     devs_hsv = ImageManager.calculate_deviation2(img_hsv)
     ranges_hsv = ImageManager.calculate_range2(img_hsv)
-    gradient = cv2.Sobel(img_BaW, cv2.CV_64F,1,0,ksize=5)
+    gradient = cv2.Sobel(img_BaW, cv2.CV_64F,1,0,ksize=-1)
     #print(abs(np.mean(gradient)/250))
     return (means[0], means[1], means[2], devs[0], devs[1], devs[2], ranges[0], ranges[1], ranges[2],
             means_hsv[0], means_hsv[1], means_hsv[2], devs_hsv[0], devs_hsv[1], devs_hsv[2], ranges_hsv[0], ranges_hsv[1], ranges_hsv[2],
             abs(np.mean(gradient)/250), ImageManager.entropy(img))
 
-def retrieve_data2(img, img_hsv):
+def retrieve_data2(img, img_hsv, img_BaW):
     means = ImageManager.calculate_means(img)
     devs = ImageManager.calculate_deviation2(img)
     ranges = ImageManager.calculate_range2(img)
     means_hsv = ImageManager.calculate_means(img_hsv)
     devs_hsv = ImageManager.calculate_deviation2(img_hsv)
     ranges_hsv = ImageManager.calculate_range2(img_hsv)
-    #gradient = cv2.Sobel(img_BaW_original[segments==img_BaW], cv2.CV_64F,1,0,ksize=5)
-    #print(abs(np.mean(gradient)/250))
+    gradient = cv2.Sobel(img_BaW, cv2.CV_64F,1,0,ksize=-1)
+    #print(abs(np.max(gradient)/13000))
     return (means[0], means[1], means[2], devs[0], devs[1], devs[2], ranges[0], ranges[1], ranges[2],
             means_hsv[0], means_hsv[1], means_hsv[2], devs_hsv[0], devs_hsv[1], devs_hsv[2], ranges_hsv[0], ranges_hsv[1], ranges_hsv[2],
-            ImageManager.entropy(img))
-
+            abs(np.max(gradient)/13000), ImageManager.entropy(img))
+            #0,ImageManager.entropy(img))
 def slice_image(img, img_BaW, rows, columns):
     img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     height, width, channels = img.shape
@@ -68,17 +68,19 @@ def slice_image(img, img_BaW, rows, columns):
 def slic_image(img, img_BaW, rows, columns):
     img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     n = rows*columns
-    segments = slic(img, n_segments=100, sigma=5)
+    segments = slic(img, n_segments=100, sigma=1)
     parts = range(n)
     parts_hsv = range(n)
     parts_BaW = range(n)
     for (i, segVal) in enumerate(np.unique(segments)):
         parts[i]=img[segments==segVal]
         parts_hsv[i]=img_hsv[segments==segVal]
-        parts_BaW[i]=img_BaW[segments==segVal]
-    cv2.namedWindow("superpixels");
-    cv2.moveWindow("superpixels", 20,20);
-    cv2.imshow("superpixels", mark_boundaries(img,segments))
+        temp = np.zeros(img_BaW.shape)
+        temp[segments == segVal] = img_BaW[segments == segVal]
+        parts_BaW[i]=temp
+    #cv2.namedWindow("superpixels");
+    #cv2.moveWindow("superpixels", 20,20);
+    #cv2.imshow("superpixels", mark_boundaries(img,segments))
     # cv2.waitKey()
     # cv2.destroyAllWindows()
     return [parts, parts_hsv, parts_BaW, segments]
@@ -172,7 +174,7 @@ def calculate_y(mask,j):
     return np.mean(mask[int(j / 12) * 53:(int(j / 12) + 1) * 53, j % 12 * 53:((j % 12) + 1) * 53, :]) > 130
 
 def calculate_y2(mask,segVal, segments):
-    return np.mean(mask[segVal==segments]) > 130
+    return np.mean(mask[segVal==segments]) > 127
 
 
 def entropy(img):

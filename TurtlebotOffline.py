@@ -35,8 +35,8 @@ class Turtlebot:
 
     def move(self, p, s):
         msg = Twist()
-        print(p[84-s:96-s])
-        print(p[96-s:108-s])
+        #print(p[84-s:96-s])
+        #print(p[96-s:108-s])
         left = sum(p[84-s:88-s])
         central = sum(p[88-s:92-s])
         rigth = sum(p[92-s:96-s])
@@ -103,7 +103,8 @@ if __name__ == '__main__':
     performance = 0
     band = False
     start = 0
-    for i in range(10):
+    cont=0.0
+    for i in range(161):
         #***********implementacion diviendo la imagen en cuadros*******************
         # if(not band):
         #     start = i
@@ -144,17 +145,17 @@ if __name__ == '__main__':
         parts2, parts2_hsv, parts2_BaW, segments = ImageManager.slic_image(image, imageBaW, 9, 12)
         p2 = []
         for j in range(108):
-            x2 = ImageManager.retrieve_data2(parts2[j],parts2_hsv[j])
+            x2 = ImageManager.retrieve_data2(parts2[j], parts2_hsv[j], parts2_BaW[j])
             p2.append(int(turtlebot.svm.get_model().predict(np.asarray(x2).reshape(1, len(x2)))))
         turtlebot.move(p2, 0)
         if turtlebot.pred[i-start]==turtlebot.get_desired_values()[i]:
             performance += 1
-        cv2.namedWindow(img_name);
-        cv2.moveWindow(img_name, 710,280);
-        cv2.imshow(img_name, image)
+        cont = cont + 1.0
+        #cv2.namedWindow(img_name);
+        #cv2.moveWindow(img_name, 710,280);
+        #cv2.imshow(img_name, image)
         print("tiempo: %f" % (time.time()-t))
-        turtlebot.debug2(p2, image, segments)
-        cv2.waitKey()
-        cv2.destroyAllWindows()
-
-    print("good ones: %d" %(performance))
+        #turtlebot.debug2(p2, image, segments)
+        #cv2.waitKey()
+        #cv2.destroyAllWindows()
+    print("performance: %.2f%%" %( performance/cont*100 ))

@@ -40,7 +40,7 @@ class SvmModel:
     def calculate_data2(self, parts, parts_hsv, parts_BaW, mask, img_BaW, segments):
         #for j in range(len(parts)):
         for (j, segVal) in enumerate(np.unique(segments)):
-            self.x.append(ImageManager.retrieve_data2(parts[j], parts_hsv[j]))
+            self.x.append(ImageManager.retrieve_data2(parts[j], parts_hsv[j], parts_BaW[j]))
             self.y.append(ImageManager.calculate_y2(mask, segVal, segments))
 
     def train_model_slice(self):
