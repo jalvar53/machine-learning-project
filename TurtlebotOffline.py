@@ -73,7 +73,7 @@ class Turtlebot:
         rospy.sleep(1)
 
     def debug(self, p, image):
-        self.imageBaW = image[:,:,:]
+        self.imageBaW = np.zeros((image.shape))
         height, width, channels = self.imageBaW.shape
         height = height / 9
         width = width / 12
@@ -103,7 +103,7 @@ if __name__ == '__main__':
     performance = 0
     band = False
     start = 0
-    for i in range(11):
+    for i in range(10):
         #***********implementacion diviendo la imagen en cuadros*******************
         # if(not band):
         #     start = i
@@ -113,11 +113,11 @@ if __name__ == '__main__':
         # img_name += str(int(num/100))
         # num = num % 100
         # img_name += str(int(num/10)) + str(int(num%10))
-        # image = ImageManager.load_image(img_name)
-        # parts,parts_hsv = ImageManager.slice_image(image, 9, 12)
+        # image, imageBaW = ImageManager.load_image(img_name)
+        # parts,parts_hsv, parts_BaW = ImageManager.slice_image(image, imageBaW, 9, 12)
         # p = []
         # for j in range(108):
-        #     x = ImageManager.retrieve_data(parts[j],parts_hsv[j])
+        #     x = ImageManager.retrieve_data(parts[j],parts_hsv[j],parts_BaW[j])
         #     p.append(int(turtlebot.svm.get_model().predict(np.asarray(x).reshape(1, len(x)))))
         # turtlebot.move(p, 0)
         # if turtlebot.pred[i-start]==turtlebot.get_desired_values()[i]:
@@ -140,8 +140,8 @@ if __name__ == '__main__':
         img_name += str(int(num/100))
         num = num % 100
         img_name += str(int(num/10)) + str(int(num%10))
-        image = ImageManager.load_image(img_name)
-        parts2,parts2_hsv,segments = ImageManager.slic_image(image, 9, 12)
+        image, imageBaW = ImageManager.load_image(img_name)
+        parts2, parts2_hsv, parts2_BaW, segments = ImageManager.slic_image(image, imageBaW, 9, 12)
         p2 = []
         for j in range(108):
             x2 = ImageManager.retrieve_data2(parts2[j],parts2_hsv[j])
@@ -153,7 +153,7 @@ if __name__ == '__main__':
         cv2.moveWindow(img_name, 710,280);
         cv2.imshow(img_name, image)
         print("tiempo: %f" % (time.time()-t))
-        #turtlebot.debug2(p2, image, segments)
+        turtlebot.debug2(p2, image, segments)
         cv2.waitKey()
         cv2.destroyAllWindows()
 

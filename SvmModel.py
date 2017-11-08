@@ -32,15 +32,15 @@ class SvmModel:
         self.model.fit(self.x, self.y.reshape((self.x.shape[0])))
 
 
-    def calculate_data(self, parts, parts_hsv, mask):
+    def calculate_data(self, parts, parts_hsv, parts_BaW, mask):
         for j in range(len(parts)):
-            self.x.append(ImageManager.retrieve_data(parts[j], parts_hsv[j]))
+            self.x.append(ImageManager.retrieve_data(parts[j], parts_hsv[j], parts_BaW[j]))
             self.y.append(ImageManager.calculate_y(mask,j))
 
-    def calculate_data2(self, parts, parts_hsv, mask, segments):
+    def calculate_data2(self, parts, parts_hsv, parts_BaW, mask, img_BaW, segments):
         #for j in range(len(parts)):
         for (j, segVal) in enumerate(np.unique(segments)):
-            self.x.append(ImageManager.retrieve_data2(parts[j],parts_hsv[j]))
+            self.x.append(ImageManager.retrieve_data2(parts[j], parts_hsv[j]))
             self.y.append(ImageManager.calculate_y2(mask, segVal, segments))
 
     def train_model_slice(self):
@@ -81,16 +81,16 @@ if __name__ == '__main__':
         num = num % 100
         img_name += str(int(num/10)) + str(int(num%10))
         mask_name += str(int(num/10)) + str(int(num%10))
-        image = ImageManager.load_image(img_name)
-        mask = ImageManager.load_image(mask_name)
+        image, imageBaW = ImageManager.load_image(img_name)
+        mask = ImageManager.load_image(mask_name)[0]
         #segments = ImageManager.slic_image(image, 100)
 
         ##diciendo imagen en cuadros
-        # parts,parts_hsv = ImageManager.slice_image(image,9,12)
-        # svm.calculate_data(parts, parts_hsv, mask)
+        # parts, parts_hsv, parts_BaW = ImageManager.slice_image(image, imageBaW, 9, 12)
+        # svm.calculate_data(parts, parts_hsv, parts_BaW, mask)
 
         ##con superpixeles
-        parts, parts_hsv, segments = ImageManager.slic_image(image,9,12)
-        svm.calculate_data2(parts, parts_hsv, mask, segments)
+        parts, parts_hsv, parts_BaW, segments = ImageManager.slic_image(image, imageBaW, 9, 12)
+        svm.calculate_data2(parts, parts_hsv, parts_BaW, mask, imageBaW, segments)
     svm.train_model_slice()
     svm.save_model()
