@@ -68,7 +68,7 @@ def slice_image(img, img_BaW, rows, columns):
 def slic_image(img, img_BaW, rows, columns):
     img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     n = rows*columns
-    segments = slic(img, n_segments=100, sigma=1)
+    segments = slic(img, n_segments=100, sigma=5)
     parts = range(n)
     parts_hsv = range(n)
     parts_BaW = range(n)
