@@ -104,7 +104,7 @@ if __name__ == '__main__':
     band = False
     start = 0
     cont=0.0
-    for i in range(161):
+    for i in range(151,161):
         #***********implementacion diviendo la imagen en cuadros*******************
         # if(not band):
         #     start = i
@@ -115,10 +115,10 @@ if __name__ == '__main__':
         # num = num % 100
         # img_name += str(int(num/10)) + str(int(num%10))
         # image, imageBaW = ImageManager.load_image(img_name)
-        # parts,parts_hsv, parts_BaW = ImageManager.slice_image(image, imageBaW, 9, 12)
+        # parts, parts_hsv, parts_BaW = ImageManager.slice_image(image, 9, 12)
         # p = []
         # for j in range(108):
-        #     x = ImageManager.retrieve_data(parts[j],parts_hsv[j],parts_BaW[j])
+        #     x = ImageManager.retrieve_data(parts[j], parts_hsv[j], parts_BaW[j])
         #     p.append(int(turtlebot.svm.get_model().predict(np.asarray(x).reshape(1, len(x)))))
         # turtlebot.move(p, 0)
         # if turtlebot.pred[i-start]==turtlebot.get_desired_values()[i]:
@@ -147,6 +147,7 @@ if __name__ == '__main__':
         for j in range(108):
             x2 = ImageManager.retrieve_data2(parts2[j], parts2_hsv[j], parts2_BaW[j])
             p2.append(int(turtlebot.svm.get_model().predict(np.asarray(x2).reshape(1, len(x2)))))
+        print("tiempo para calcular x y predecir total: %f" % (time.time()-t))
         turtlebot.move(p2, 0)
         if turtlebot.pred[i-start]==turtlebot.get_desired_values()[i]:
             performance += 1

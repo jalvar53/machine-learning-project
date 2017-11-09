@@ -144,10 +144,11 @@ if __name__ == '__main__':
         # cv2.namedWindow("whate");
         # cv2.moveWindow("whate", 710,280);
         # cv2.imshow("whate", turtlebot.image)
-        # parts = ImageManager.slice_image(turtlebot.image, 9, 12)
+        # imageBaW = cv2.cvtColor(turtlebot.image, cv2.COLOR_BGR2GRAY)
+        # parts, parts_hsv, parts_BaW = ImageManager.slice_image(turtlebot.image,  imageBaW, 9, 12)
         # p = []
         # for j in range(84, 108):
-        #     x = ImageManager.retrieve_data(parts[j])
+        #     x = ImageManager.retrieve_data(parts[j], parts_hsv[j], parts_BaW[j])
         #     p.append(int(turtlebot.svm.get_model().predict(np.asarray(x).reshape(1, 13))))
         # turtlebot.move(p, 84)
         # turtlebot.debug(p, turtlebot.image)
@@ -159,10 +160,11 @@ if __name__ == '__main__':
         cv2.namedWindow("whate");
         cv2.moveWindow("whate", 710,280);
         cv2.imshow("whate", turtlebot.image)
-        parts2,segments = ImageManager.slic_image(turtlebot.image, 9, 12)
+        imageBaW = cv2.cvtColor(turtlebot.image, cv2.COLOR_BGR2GRAY)
+        parts2, parts2_hsv, parts2_BaW, segments = ImageManager.slic_image(turtlebot.image, imageBaW, 9, 12)
         p2 = []
         for j in range(84, 108):
-            x2 = ImageManager.retrieve_data2(parts2[j])
+            x2 = ImageManager.retrieve_data2(parts2[j], parts2_hsv[j], parts2_BaW[j])
             p2.append(int(turtlebot.svm.get_model().predict(np.asarray(x2).reshape(1, 13))))
         turtlebot.move(p2, 84)
         turtlebot.debug2(p2, turtlebot.image, segments)
