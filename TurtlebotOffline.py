@@ -1,5 +1,8 @@
 import rospy
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, Pose, Point, Quaternion
+from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
+import actionlib
+from actionlib_msgs.msg import *
 from SvmModel import SvmModel
 import ImageManager
 import numpy as np
@@ -11,7 +14,15 @@ class Turtlebot:
 
     def __init__(self):
         self.svm = SvmModel()
-        self.x = 0
+        self.goal_sent = False
+        rospy.on_shutdown(self.shutdown)
+        # Tell the action client that we want to spin a thread by default
+        self.move_base = actionlib.SimpleActionClient("move_base", MoveBaseAction)
+        rospy.loginfo("Wait for the action server to come up")
+
+        # Allow up to 5 seconds for the action server to come up
+        self.move_base.wait_for_server(rospy.Duration(5))
+        #self.x = 0
         self.pred=[]
         self.exp = [0,0,0,0,0,0,0,0,0,0,
                      0,0,0,0,0,0,1,2,3,3,
@@ -32,6 +43,33 @@ class Turtlebot:
 
     def get_desired_values(self):
         return self.exp
+
+    def goto(self, pos, quat):
+        # Send a goal
+        self.goal_sent = True
+    	goal = MoveBaseGoal()
+    	goal.target_pose.header.frame_id = 'map'
+    	goal.target_pose.header.stamp = rospy.Time.now()
+        goal.target_pose.pose = Pose(Point(pos['x'], pos['y'], 0.000), Quaternion(quat['r1'], quat['r2'], quat['r3'], quat['r4']))
+
+    	# Start moving
+        self.move_base.send_goal(goal)
+
+    	# Allow TurtleBot up to 60 seconds to complete task
+    	success = self.move_base.wait_for_result(rospy.Duration(60))
+
+        state = self.move_base.get_state()
+        result = False
+
+        if success and state == GoalStatus.SUCCEEDED:
+            # We made it!
+            result = True
+        else:
+            self.move_base.cancel_goal()
+
+        self.goal_sent = False
+        return result
+
 
     def move(self, p, s):
         msg = Twist()
@@ -70,6 +108,10 @@ class Turtlebot:
     def shutdown(self):
         rospy.loginfo("Stopping Turtlebot")
         self.publisher.publish(Twist())
+
+        if self.goal_sent:
+            self.move_base.cancel_goal()
+        rospy.loginfo("Stop")
         rospy.sleep(1)
 
     def debug(self, p, image):
@@ -104,7 +146,7 @@ if __name__ == '__main__':
     band = False
     start = 0
     cont=0.0
-    for i in range(161):
+    for i in range(94,105):
         #***********implementacion diviendo la imagen en cuadros*******************
         # if(not band):
         #     start = i
@@ -131,6 +173,7 @@ if __name__ == '__main__':
         # cv2.destroyAllWindows()
 
 
+
         #******************implementacion con superpixeles**************************
         t=time.time()
         if(not band):
@@ -148,6 +191,13 @@ if __name__ == '__main__':
             x2 = ImageManager.retrieve_data2(parts2[j], parts2_hsv[j], parts2_BaW[j])
             p2.append(int(turtlebot.svm.get_model().predict(np.asarray(x2).reshape(1, len(x2)))))
         turtlebot.move(p2, 0)
+
+        ##lineas para moverse a una locacion expecifica en el mapa.
+        #position = {'x': 1.22, 'y' : 2.56}
+        #quaternion = {'r1' : 0.000, 'r2' : 0.000, 'r3' : 0.000, 'r4' : 1.000}
+        #rospy.loginfo("Go to (%s, %s) pose", position['x'], position['y'])
+        #success = turtlebot.goto(position, quaternion)
+
         if turtlebot.pred[i-start]==turtlebot.get_desired_values()[i]:
             performance += 1
         cont = cont + 1.0
@@ -155,7 +205,7 @@ if __name__ == '__main__':
         #cv2.moveWindow(img_name, 710,280);
         #cv2.imshow(img_name, image)
         print("tiempo: %f" % (time.time()-t))
-        #turtlebot.debug2(p2, image, segments)
-        #cv2.waitKey()
-        #cv2.destroyAllWindows()
+        turtlebot.debug2(p2, image, segments)
+        cv2.waitKey()
+        cv2.destroyAllWindows()
     print("performance: %.2f%%" %( performance/cont*100 ))

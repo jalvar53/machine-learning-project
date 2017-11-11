@@ -41,7 +41,7 @@ def retrieve_data2(img, img_hsv, img_BaW):
     means_hsv = ImageManager.calculate_means(img_hsv)
     devs_hsv = ImageManager.calculate_deviation2(img_hsv)
     ranges_hsv = ImageManager.calculate_range2(img_hsv)
-    gradient = cv2.Sobel(img_BaW, cv2.CV_64F,1,0,ksize=-1)
+    #gradient = cv2.Sobel(img_BaW, cv2.CV_64F,1,0,ksize=-1)
     # return (means[0], means[1], means[2], devs[0], devs[1], devs[2], ranges[0], ranges[1], ranges[2],
     #         means_hsv[0], means_hsv[1], means_hsv[2], devs_hsv[0], devs_hsv[1], devs_hsv[2], ranges_hsv[0], ranges_hsv[1], ranges_hsv[2],
     #         abs(np.max(gradient)/13000), ImageManager.entropy(img))
@@ -88,9 +88,9 @@ def slic_image(img, img_BaW, rows, columns):
         temp[pos] = img_BaW[pos]
         parts_BaW[i]=temp
     #print("tiempo para sacar partes: %f" % (time.time()-t))
-    #cv2.namedWindow("superpixels");
-    #cv2.moveWindow("superpixels", 20,20);
-    #cv2.imshow("superpixels", mark_boundaries(img,segments))
+    cv2.namedWindow("superpixels");
+    cv2.moveWindow("superpixels", 20,20);
+    cv2.imshow("superpixels", mark_boundaries(img,segments))
     #cv2.waitKey()
     #cv2.destroyAllWindows()
     return [parts, parts_hsv, parts_BaW, segments]
