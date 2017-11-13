@@ -163,6 +163,13 @@ if __name__ == '__main__':
         #     x = ImageManager.retrieve_data(parts[j], parts_hsv[j], parts_BaW[j])
         #     p.append(int(turtlebot.svm.get_model().predict(np.asarray(x).reshape(1, len(x)))))
         # turtlebot.move(p, 0)
+
+        ##************+lineas para moverse a una locacion expecifica en el mapa.*************************
+        #position = {'x': 1.22, 'y' : 2.56}
+        #quaternion = {'r1' : 0.000, 'r2' : 0.000, 'r3' : 0.000, 'r4' : 1.000}
+        #rospy.loginfo("Go to (%s, %s) pose", position['x'], position['y'])
+        #success = turtlebot.goto(position, quaternion)
+
         # if turtlebot.pred[i-start]==turtlebot.get_desired_values()[i]:
         #     performance += 1
         # cv2.namedWindow(img_name);
@@ -192,7 +199,7 @@ if __name__ == '__main__':
             p2.append(int(turtlebot.svm.get_model().predict(np.asarray(x2).reshape(1, len(x2)))))
         turtlebot.move(p2, 0)
 
-        ##lineas para moverse a una locacion expecifica en el mapa.
+        ##************+lineas para moverse a una locacion expecifica en el mapa.*************************
         #position = {'x': 1.22, 'y' : 2.56}
         #quaternion = {'r1' : 0.000, 'r2' : 0.000, 'r3' : 0.000, 'r4' : 1.000}
         #rospy.loginfo("Go to (%s, %s) pose", position['x'], position['y'])
