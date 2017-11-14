@@ -57,27 +57,27 @@ class Turtlebot:
             print("Move forwards")
         elif left > 2 or lefts > 2:
             msg.linear.x = 0
-            msg.angular.z = 0.2
+            msg.angular.z = 0.5
             self.pred.append(3)
             print("Move left")
         elif right > 2 or rights > 2:
             msg.linear.x = 0
-            msg.angular.z = -0.2
+            msg.angular.z = -0.5
             self.pred.append(1)
             print("Move right")
         elif left > 1 or lefts > 1:
             msg.linear.x = 0
-            msg.angular.z = 0.4
+            msg.angular.z = 0.8
             self.pred.append(3)
             print("Move left")
         elif right > 1 or rights > 1:
             msg.linear.x = 0
-            msg.angular.z = -0.4
+            msg.angular.z = -0.8
             self.pred.append(1)
             print("Move right")
         elif left > 0 or lefts > 0:
             msg.linear.x = 0
-            msg.angular.z = 0.8
+            msg.angular.z = 1.2
             self.pred.append(3)
             print("Move left")
         elif right > 0 or rights > 0:
@@ -106,30 +106,30 @@ class Turtlebot:
         self.image_received = True
         self.image = cv_image
 
-def debug(self, p, image):
-    self.imageBaW = image[:,:,:]
-    height, width, channels = self.imageBaW.shape
-    height = height / 9
-    width = width / 12
-    for i in range(len(p)):
-        if(p[i]):
-            self.imageBaW[int(i/12) * height:(int(i/12) + 1) * height, int(i%12) * width:(int(i%12) + 1) * width]=255
-        else:
-            self.imageBaW[int(i/12) * height:(int(i/12) + 1) * height, int(i%12) * width:(int(i%12) + 1) * width]=0
-    cv2.namedWindow("debug");
-    cv2.moveWindow("debug", 710,20);
-    cv2.imshow("debug", self.imageBaW)
+    def debug(self, p, image):
+        self.imageBaW = image[:,:,:]
+        height, width, channels = self.imageBaW.shape
+        height = height / 9
+        width = width / 12
+        for i in range(len(p)):
+            if(p[i]):
+                self.imageBaW[int(i/12) * height:(int(i/12) + 1) * height, int(i%12) * width:(int(i%12) + 1) * width]=255
+            else:
+                self.imageBaW[int(i/12) * height:(int(i/12) + 1) * height, int(i%12) * width:(int(i%12) + 1) * width]=0
+        cv2.namedWindow("debug");
+        cv2.moveWindow("debug", 710,20);
+        cv2.imshow("debug", self.imageBaW)
 
-def debug2(self, p, image, segments):
-    self.imageBaW = np.zeros((image.shape))
-    for (i, segVal) in enumerate(np.unique(segments)):
-        if(p[i]):
-            self.imageBaW[segments==segVal]=255
-        else:
-            self.imageBaW[segments==segVal]=0
-    cv2.namedWindow("debug");
-    cv2.moveWindow("debug", 710,20);
-    cv2.imshow("debug", self.imageBaW)
+    def debug2(self, p, image, segments):
+        self.imageBaW = np.zeros((image.shape))
+        for (i, segVal) in enumerate(np.unique(segments)):
+            if(p[i]):
+                self.imageBaW[segments==segVal]=255
+            else:
+                self.imageBaW[segments==segVal]=0
+        cv2.namedWindow("debug");
+        cv2.moveWindow("debug", 710,20);
+        cv2.imshow("debug", self.imageBaW)
 
 if __name__ == '__main__':
     turtlebot = Turtlebot()
@@ -149,7 +149,7 @@ if __name__ == '__main__':
         # p = []
         # for j in range(84, 108):
         #     x = ImageManager.retrieve_data(parts[j], parts_hsv[j], parts_BaW[j])
-        #     p.append(int(turtlebot.svm.get_model().predict(np.asarray(x).reshape(1, 13))))
+        #     p.append(int(turtlebot.svm.get_model().predict(np.asarray(x).reshape(1, len(x)))))
         # turtlebot.move(p, 84)
         # turtlebot.debug(p, turtlebot.image)
         # cv2.waitKey(5000)
@@ -163,10 +163,10 @@ if __name__ == '__main__':
         imageBaW = cv2.cvtColor(turtlebot.image, cv2.COLOR_BGR2GRAY)
         parts2, parts2_hsv, parts2_BaW, segments = ImageManager.slic_image(turtlebot.image, imageBaW, 9, 12)
         p2 = []
-        for j in range(84, 108):
+        for j in range(108):
             x2 = ImageManager.retrieve_data2(parts2[j], parts2_hsv[j], parts2_BaW[j])
-            p2.append(int(turtlebot.svm.get_model().predict(np.asarray(x2).reshape(1, 13))))
-        turtlebot.move(p2, 84)
+            p2.append(int(turtlebot.svm.get_model().predict(np.asarray(x2).reshape(1, len(x2)))))
+        turtlebot.move(p2, 0)
         turtlebot.debug2(p2, turtlebot.image, segments)
         cv2.waitKey(5000)
         cv2.destroyAllWindows()
