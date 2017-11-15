@@ -8,6 +8,7 @@ from math import radians
 import ImageManager
 import numpy as np
 import cv2
+import math
 
 
 class Turtlebot:
@@ -24,6 +25,7 @@ class Turtlebot:
         self.x = 0
         self.stage = 0
         self.pred = []
+        self.ini_pose = [0,0]
         self.exp = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 1, 2, 3, 3,
                      0, 0, 0, 0, 0, 0, 0, 3, 0, 0,
@@ -44,221 +46,61 @@ class Turtlebot:
     def get_desired_values(self):
         return self.exp
 
+    def get_distance(self,a,b):
+        print(a, "de funcion")
+        print(b, "de funcion")
+        return (math.sqrt((a[0]-b[0])**2 + (a[1]-b[1])**2))
+
     def move(self, msg, p):
         send = Twist()
+        r = rospy.Rate(5);
         s=0
-        print(p[84-s:96-s])
-        print(p[96-s:108-s])
+        #print(p[84-s:96-s])
+        #print(p[96-s:108-s])
         left = sum(p[84-s:88-s])
         central = sum(p[88-s:92-s])
         right = sum(p[92-s:96-s])
         lefts = sum(p[96-s:100-s])
         rights = sum(p[104-s:108-s])
 
-        r = rospy.Rate(5);
-        destination = [-14,0]
-        if(msg.pose.pose.position.x > destination[0]):
-            send.linear.x = 0.2
-            send.angular.z = 0
-            self.pred.append(0)
-            print("Move forwards")
-        else:
-            for x in range(0,10):
-                send.linear.x = 0
-                send.angular.z = radians(45)
-                r.sleep()
-            self.stage = 1
+        if(self.stage == 0):
+            ##guardar posicion inicial
+            self.ini_pos = (msg.pose.pose.position.x, msg.pose.pose.position.y)
+            self.stage=1
+        elif(self.stage==1):
+            ##moverse hasta 14 de distancia
+            if(self.get_distance((msg.pose.pose.position.x, msg.pose.pose.position.y), self.ini_pos) < 6):
+                send.linear.x = 0.2
+                send.angular.z = 0
+                print("Move forward")
+            else:
+                for x in range(0,10):
+                    send.linear.x = 0
+                    send.angular.z = radians(45)
+                    r.sleep()
+                    print("girando")
+                self.stage = 2
+        elif(self.stage == 2):
+            print("llegue al destino y gire")
+        print(self.ini_pos, "aca")
+        print(msg.pose.pose.position.x,msg.pose.pose.position.y)
+        print self.get_distance((msg.pose.pose.position.x, msg.pose.pose.position.y), self.ini_pos)
         self.publisher.publish(send)
 
-        # orientation = msg.pose.pose.orientation
-        # goal = "unknown"
-        # aim = "undefined"
-        # if(orientation.z > -0.2 and orientation.z < 0.2):
-        #     aim = "up"
-        # elif(orientation.z > -0.85 and orientation.z < -0.2):
-        #     aim = "left"
-        # elif(orientation.z > -0.85):
-        #     aim = "back"
-        # else:
-        #     aim = "right"
-        #
-        # if(abs(pose.pose.position.y - destination[1]) > abs(pose.pose.position.x - destination[0])):
-        #     if(pose.pose.position.y > destination[1]):
-        #         goal = "backwards"
-        #     else:
-        #         goal = "ahead"
-        # else:
-        #     if(pose.pose.position.x > destination[0]):
-        #         goal = "left"
-        #     else:
-        #         goal = "right"
-        #
-        # if goal == "ahead":
-        #     if central > 2:
-        #         msg.linear.x = 0.2
-        #         msg.angular.z = 0
-        #         self.pred.append(0)
-        #         print("Move forwards")
-        #     elif left > 2 or lefts > 2:
-        #         msg.linear.x = 0
-        #         msg.angular.z = 0.5
-        #         self.pred.append(3)
-        #         print("Move left")
-        #     elif right > 2 or rights > 2:
-        #         msg.linear.x = 0
-        #         msg.angular.z = -0.5
-        #         self.pred.append(1)
-        #         print("Move right")
-        #     elif left > 1 or lefts > 1:
-        #         msg.linear.x = 0
-        #         msg.angular.z = 0.8
-        #         self.pred.append(3)
-        #         print("Move left")
-        #     elif right > 1 or rights > 1:
-        #         msg.linear.x = 0
-        #         msg.angular.z = -0.8
-        #         self.pred.append(1)
-        #         print("Move right")
-        #     elif left > 0 or lefts > 0:
-        #         msg.linear.x = 0
-        #         msg.angular.z = 1.2
-        #         self.pred.append(3)
-        #         print("Move left")
-        #     elif right > 0 or rights > 0:
-        #         msg.linear.x = -0.2
-        #         msg.angular.z = 0
-        #         self.pred.append(1)
-        #         print("Move backwards")
-        #     else:
-        #         msg.linear.x = -0.2
-        #         msg.angular.z = 0
-        #         self.pred.append(2)
-        #         print("Move backwards")
-        # elif goal == "rigth":
-        #     if right > 2 or rights > 2:
-        #         msg.linear.x = 0
-        #         msg.angular.z = -0.5
-        #         self.pred.append(1)
-        #         print("Move right")
-        #     elif central > 2:
-        #         msg.linear.x = 0.2
-        #         msg.angular.z = 0
-        #         self.pred.append(0)
-        #         print("Move forwards")
-        #     elif left > 2 or lefts > 2:
-        #         msg.linear.x = 0
-        #         msg.angular.z = 0.5
-        #         self.pred.append(3)
-        #         print("Move left")
-        #     elif right > 1 or rights > 1:
-        #         msg.linear.x = 0
-        #         msg.angular.z = -0.8
-        #         self.pred.append(1)
-        #         print("Move right")
-        #     elif left > 1 or lefts > 1:
-        #         msg.linear.x = 0
-        #         msg.angular.z = 0.8
-        #         self.pred.append(3)
-        #         print("Move left")
-        #     elif right > 0 or rights > 0:
-        #         msg.linear.x = -0.2
-        #         msg.angular.z = 0
-        #         self.pred.append(1)
-        #         print("Move rigth")
-        #     elif left > 0 or lefts > 0:
-        #         msg.linear.x = 0
-        #         msg.angular.z = 1.2
-        #         self.pred.append(3)
-        #         print("Move left")
-        #     else:
-        #         msg.linear.x = -0.2
-        #         msg.angular.z = 0
-        #         self.pred.append(2)
-        #         print("Move backwards")
-        # elif goal == "left":
-        #     if left > 2 or lefts > 2:
-        #         msg.linear.x = 0
-        #         msg.angular.z = 0.5
-        #         self.pred.append(3)
-        #         print("Move left")
-        #     elif central > 2:
-        #         msg.linear.x = 0.2
-        #         msg.angular.z = 0
-        #         self.pred.append(0)
-        #         print("Move forwards")
-        #     elif right > 2 or rights > 2:
-        #         msg.linear.x = 0
-        #         msg.angular.z = -0.5
-        #         self.pred.append(1)
-        #         print("Move right")
-        #     elif left > 1 or lefts > 1:
-        #         msg.linear.x = 0
-        #         msg.angular.z = 0.8
-        #         self.pred.append(3)
-        #         print("Move left")
-        #     elif right > 1 or rights > 1:
-        #         msg.linear.x = 0
-        #         msg.angular.z = -0.8
-        #         self.pred.append(1)
-        #         print("Move right")
-        #     elif left > 0 or lefts > 0:
-        #         msg.linear.x = 0
-        #         msg.angular.z = 1.2
-        #         self.pred.append(3)
-        #         print("Move left")
-        #     elif right > 0 or rights > 0:
-        #         msg.linear.x = -0.2
-        #         msg.angular.z = 0
-        #         self.pred.append(1)
-        #         print("Move backwards")
-        #     else:
-        #         msg.linear.x = -0.2
-        #         msg.angular.z = 0
-        #         self.pred.append(2)
-        #         print("Move backwards")
-        # else:
-        #     if left > 2 or lefts > 2:
-        #         msg.linear.x = 0
-        #         msg.angular.z = 0.5
-        #         self.pred.append(3)
-        #         print("Move left")
-        #     elif right > 2 or rights > 2:
-        #         msg.linear.x = 0
-        #         msg.angular.z = -0.5
-        #         self.pred.append(1)
-        #         print("Move right")
-        #     elif central > 2:
-        #         msg.linear.x = 0.2
-        #         msg.angular.z = 0
-        #         self.pred.append(0)
-        #         print("Move forwards")
-        #     elif left > 1 or lefts > 1:
-        #         msg.linear.x = 0
-        #         msg.angular.z = 0.8
-        #         self.pred.append(3)
-        #         print("Move left")
-        #     elif right > 1 or rights > 1:
-        #         msg.linear.x = 0
-        #         msg.angular.z = -0.8
-        #         self.pred.append(1)
-        #         print("Move right")
-        #     elif left > 0 or lefts > 0:
-        #         msg.linear.x = 0
-        #         msg.angular.z = 1.2
-        #         self.pred.append(3)
-        #         print("Move left")
-        #     elif right > 0 or rights > 0:
-        #         msg.linear.x = -0.2
-        #         msg.angular.z = 0
-        #         self.pred.append(1)
-        #         print("Move backwards")
-        #     else:
-        #         msg.linear.x = -0.2
-        #         msg.angular.z = 0
-        #         self.pred.append(2)
-        #         print("Move backwards")
-
-
+        # destination = [-6,0]
+        # print(msg.pose.pose.position.x,msg.pose.pose.position.y)
+        # if(msg.pose.pose.position.x > destination[0]):
+        #     send.linear.x = 0.2
+        #     send.angular.z = 0
+        #     self.pred.append(0)
+        #     print("Move forward")
+        # elif (self.stage==0):
+        #     for x in range(0,10):
+        #         send.linear.x = 0
+        #         send.angular.z = radians(45)
+        #         r.sleep()
+        #     self.stage = 1
+        # self.publisher.publish(send)
 
         # if central > 2:
         #     msg.linear.x = 0.2
@@ -370,9 +212,9 @@ if __name__ == '__main__':
 
         ##*************+implementacion de superpixeles**************************
         image = turtlebot.image
-        cv2.namedWindow("whate");
-        cv2.moveWindow("whate", 710,280);
-        cv2.imshow("whate", turtlebot.image)
+        #cv2.namedWindow("whate");
+        #cv2.moveWindow("whate", 710,280);
+        #cv2.imshow("whate", turtlebot.image)
         imageBaW = cv2.cvtColor(turtlebot.image, cv2.COLOR_BGR2GRAY)
         parts2, parts2_hsv, parts2_BaW, segments = ImageManager.slic_image(turtlebot.image, imageBaW, 9, 12)
         p2 = []
@@ -381,6 +223,6 @@ if __name__ == '__main__':
             p2.append(int(turtlebot.svm.get_model().predict(np.asarray(x2).reshape(1, len(x2)))))
         #turtlebot.move(p2, 0)
         rospy.Subscriber('odom', Odometry, turtlebot.move, callback_args=[p2,0])
-        turtlebot.debug2(p2, turtlebot.image, segments)
-        cv2.waitKey(5000)
-        cv2.destroyAllWindows()
+        #turtlebot.debug2(p2, turtlebot.image, segments)
+        #cv2.waitKey()
+        #cv2.destroyAllWindows()
