@@ -4,6 +4,7 @@ from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Image
 from SvmModel import SvmModel
 from cv_bridge import CvBridge, CvBridgeError
+from math import radians
 import ImageManager
 import numpy as np
 import cv2
@@ -21,6 +22,7 @@ class Turtlebot:
         rospy.on_shutdown(self.shutdown)
         self.svm = SvmModel()
         self.x = 0
+        self.stage = 0
         self.pred = []
         self.exp = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 1, 2, 3, 3,
@@ -42,8 +44,9 @@ class Turtlebot:
     def get_desired_values(self):
         return self.exp
 
-    def move(self, msg, p, s):
-        msg = Twist()
+    def move(self, msg, p):
+        send = Twist()
+        s=0
         print(p[84-s:96-s])
         print(p[96-s:108-s])
         left = sum(p[84-s:88-s])
@@ -52,194 +55,210 @@ class Turtlebot:
         lefts = sum(p[96-s:100-s])
         rights = sum(p[104-s:108-s])
 
-        destination = [0,10]
-        orientation = msg.pose.pose.orientation
-        goal = "unknown"
-        aim = "undefined"
-        if(orientation.z > -0.2 and orientation.z < 0.2):
-            aim = "up"
-        elif(orientation.z > -0.85 and orientation.z < -0.2):
-            aim = "left"
-        elif(orientation.z > -0.85):
-            aim = "back"
+        r = rospy.Rate(5);
+        destination = [-14,0]
+        if(msg.pose.pose.position.x > destination[0]):
+            send.linear.x = 0.2
+            send.angular.z = 0
+            self.pred.append(0)
+            print("Move forwards")
         else:
-            aim = "right"
+            for x in range(0,10):
+                send.linear.x = 0
+                send.angular.z = radians(45)
+                r.sleep()
+            self.stage = 1
+        self.publisher.publish(send)
 
-        if(abs(pose.pose.position.y - destination[1]) > abs(pose.pose.position.x - destination[0])):
-            if(pose.pose.position.y > destination[1]):
-                goal = "backwards"
-            else:
-                goal = "ahead"
-        else:
-            if(pose.pose.position.x > destination[0]):
-                goal = "left"
-            else:
-                goal = "right"
+        # orientation = msg.pose.pose.orientation
+        # goal = "unknown"
+        # aim = "undefined"
+        # if(orientation.z > -0.2 and orientation.z < 0.2):
+        #     aim = "up"
+        # elif(orientation.z > -0.85 and orientation.z < -0.2):
+        #     aim = "left"
+        # elif(orientation.z > -0.85):
+        #     aim = "back"
+        # else:
+        #     aim = "right"
+        #
+        # if(abs(pose.pose.position.y - destination[1]) > abs(pose.pose.position.x - destination[0])):
+        #     if(pose.pose.position.y > destination[1]):
+        #         goal = "backwards"
+        #     else:
+        #         goal = "ahead"
+        # else:
+        #     if(pose.pose.position.x > destination[0]):
+        #         goal = "left"
+        #     else:
+        #         goal = "right"
+        #
+        # if goal == "ahead":
+        #     if central > 2:
+        #         msg.linear.x = 0.2
+        #         msg.angular.z = 0
+        #         self.pred.append(0)
+        #         print("Move forwards")
+        #     elif left > 2 or lefts > 2:
+        #         msg.linear.x = 0
+        #         msg.angular.z = 0.5
+        #         self.pred.append(3)
+        #         print("Move left")
+        #     elif right > 2 or rights > 2:
+        #         msg.linear.x = 0
+        #         msg.angular.z = -0.5
+        #         self.pred.append(1)
+        #         print("Move right")
+        #     elif left > 1 or lefts > 1:
+        #         msg.linear.x = 0
+        #         msg.angular.z = 0.8
+        #         self.pred.append(3)
+        #         print("Move left")
+        #     elif right > 1 or rights > 1:
+        #         msg.linear.x = 0
+        #         msg.angular.z = -0.8
+        #         self.pred.append(1)
+        #         print("Move right")
+        #     elif left > 0 or lefts > 0:
+        #         msg.linear.x = 0
+        #         msg.angular.z = 1.2
+        #         self.pred.append(3)
+        #         print("Move left")
+        #     elif right > 0 or rights > 0:
+        #         msg.linear.x = -0.2
+        #         msg.angular.z = 0
+        #         self.pred.append(1)
+        #         print("Move backwards")
+        #     else:
+        #         msg.linear.x = -0.2
+        #         msg.angular.z = 0
+        #         self.pred.append(2)
+        #         print("Move backwards")
+        # elif goal == "rigth":
+        #     if right > 2 or rights > 2:
+        #         msg.linear.x = 0
+        #         msg.angular.z = -0.5
+        #         self.pred.append(1)
+        #         print("Move right")
+        #     elif central > 2:
+        #         msg.linear.x = 0.2
+        #         msg.angular.z = 0
+        #         self.pred.append(0)
+        #         print("Move forwards")
+        #     elif left > 2 or lefts > 2:
+        #         msg.linear.x = 0
+        #         msg.angular.z = 0.5
+        #         self.pred.append(3)
+        #         print("Move left")
+        #     elif right > 1 or rights > 1:
+        #         msg.linear.x = 0
+        #         msg.angular.z = -0.8
+        #         self.pred.append(1)
+        #         print("Move right")
+        #     elif left > 1 or lefts > 1:
+        #         msg.linear.x = 0
+        #         msg.angular.z = 0.8
+        #         self.pred.append(3)
+        #         print("Move left")
+        #     elif right > 0 or rights > 0:
+        #         msg.linear.x = -0.2
+        #         msg.angular.z = 0
+        #         self.pred.append(1)
+        #         print("Move rigth")
+        #     elif left > 0 or lefts > 0:
+        #         msg.linear.x = 0
+        #         msg.angular.z = 1.2
+        #         self.pred.append(3)
+        #         print("Move left")
+        #     else:
+        #         msg.linear.x = -0.2
+        #         msg.angular.z = 0
+        #         self.pred.append(2)
+        #         print("Move backwards")
+        # elif goal == "left":
+        #     if left > 2 or lefts > 2:
+        #         msg.linear.x = 0
+        #         msg.angular.z = 0.5
+        #         self.pred.append(3)
+        #         print("Move left")
+        #     elif central > 2:
+        #         msg.linear.x = 0.2
+        #         msg.angular.z = 0
+        #         self.pred.append(0)
+        #         print("Move forwards")
+        #     elif right > 2 or rights > 2:
+        #         msg.linear.x = 0
+        #         msg.angular.z = -0.5
+        #         self.pred.append(1)
+        #         print("Move right")
+        #     elif left > 1 or lefts > 1:
+        #         msg.linear.x = 0
+        #         msg.angular.z = 0.8
+        #         self.pred.append(3)
+        #         print("Move left")
+        #     elif right > 1 or rights > 1:
+        #         msg.linear.x = 0
+        #         msg.angular.z = -0.8
+        #         self.pred.append(1)
+        #         print("Move right")
+        #     elif left > 0 or lefts > 0:
+        #         msg.linear.x = 0
+        #         msg.angular.z = 1.2
+        #         self.pred.append(3)
+        #         print("Move left")
+        #     elif right > 0 or rights > 0:
+        #         msg.linear.x = -0.2
+        #         msg.angular.z = 0
+        #         self.pred.append(1)
+        #         print("Move backwards")
+        #     else:
+        #         msg.linear.x = -0.2
+        #         msg.angular.z = 0
+        #         self.pred.append(2)
+        #         print("Move backwards")
+        # else:
+        #     if left > 2 or lefts > 2:
+        #         msg.linear.x = 0
+        #         msg.angular.z = 0.5
+        #         self.pred.append(3)
+        #         print("Move left")
+        #     elif right > 2 or rights > 2:
+        #         msg.linear.x = 0
+        #         msg.angular.z = -0.5
+        #         self.pred.append(1)
+        #         print("Move right")
+        #     elif central > 2:
+        #         msg.linear.x = 0.2
+        #         msg.angular.z = 0
+        #         self.pred.append(0)
+        #         print("Move forwards")
+        #     elif left > 1 or lefts > 1:
+        #         msg.linear.x = 0
+        #         msg.angular.z = 0.8
+        #         self.pred.append(3)
+        #         print("Move left")
+        #     elif right > 1 or rights > 1:
+        #         msg.linear.x = 0
+        #         msg.angular.z = -0.8
+        #         self.pred.append(1)
+        #         print("Move right")
+        #     elif left > 0 or lefts > 0:
+        #         msg.linear.x = 0
+        #         msg.angular.z = 1.2
+        #         self.pred.append(3)
+        #         print("Move left")
+        #     elif right > 0 or rights > 0:
+        #         msg.linear.x = -0.2
+        #         msg.angular.z = 0
+        #         self.pred.append(1)
+        #         print("Move backwards")
+        #     else:
+        #         msg.linear.x = -0.2
+        #         msg.angular.z = 0
+        #         self.pred.append(2)
+        #         print("Move backwards")
 
-        if goal == "ahead":
-            if central > 2:
-                msg.linear.x = 0.2
-                msg.angular.z = 0
-                self.pred.append(0)
-                print("Move forwards")
-            elif left > 2 or lefts > 2:
-                msg.linear.x = 0
-                msg.angular.z = 0.5
-                self.pred.append(3)
-                print("Move left")
-            elif right > 2 or rights > 2:
-                msg.linear.x = 0
-                msg.angular.z = -0.5
-                self.pred.append(1)
-                print("Move right")
-            elif left > 1 or lefts > 1:
-                msg.linear.x = 0
-                msg.angular.z = 0.8
-                self.pred.append(3)
-                print("Move left")
-            elif right > 1 or rights > 1:
-                msg.linear.x = 0
-                msg.angular.z = -0.8
-                self.pred.append(1)
-                print("Move right")
-            elif left > 0 or lefts > 0:
-                msg.linear.x = 0
-                msg.angular.z = 1.2
-                self.pred.append(3)
-                print("Move left")
-            elif right > 0 or rights > 0:
-                msg.linear.x = -0.2
-                msg.angular.z = 0
-                self.pred.append(1)
-                print("Move backwards")
-            else:
-                msg.linear.x = -0.2
-                msg.angular.z = 0
-                self.pred.append(2)
-                print("Move backwards")
-        elif goal == "rigth":
-            if right > 2 or rights > 2:
-                msg.linear.x = 0
-                msg.angular.z = -0.5
-                self.pred.append(1)
-                print("Move right")
-            elif central > 2:
-                msg.linear.x = 0.2
-                msg.angular.z = 0
-                self.pred.append(0)
-                print("Move forwards")
-            elif left > 2 or lefts > 2:
-                msg.linear.x = 0
-                msg.angular.z = 0.5
-                self.pred.append(3)
-                print("Move left")
-            elif right > 1 or rights > 1:
-                msg.linear.x = 0
-                msg.angular.z = -0.8
-                self.pred.append(1)
-                print("Move right")
-            elif left > 1 or lefts > 1:
-                msg.linear.x = 0
-                msg.angular.z = 0.8
-                self.pred.append(3)
-                print("Move left")
-            elif right > 0 or rights > 0:
-                msg.linear.x = -0.2
-                msg.angular.z = 0
-                self.pred.append(1)
-                print("Move rigth")
-            elif left > 0 or lefts > 0:
-                msg.linear.x = 0
-                msg.angular.z = 1.2
-                self.pred.append(3)
-                print("Move left")
-            else:
-                msg.linear.x = -0.2
-                msg.angular.z = 0
-                self.pred.append(2)
-                print("Move backwards")
-        elif goal == "left":
-            if left > 2 or lefts > 2:
-                msg.linear.x = 0
-                msg.angular.z = 0.5
-                self.pred.append(3)
-                print("Move left")
-            elif central > 2:
-                msg.linear.x = 0.2
-                msg.angular.z = 0
-                self.pred.append(0)
-                print("Move forwards")
-            elif right > 2 or rights > 2:
-                msg.linear.x = 0
-                msg.angular.z = -0.5
-                self.pred.append(1)
-                print("Move right")
-            elif left > 1 or lefts > 1:
-                msg.linear.x = 0
-                msg.angular.z = 0.8
-                self.pred.append(3)
-                print("Move left")
-            elif right > 1 or rights > 1:
-                msg.linear.x = 0
-                msg.angular.z = -0.8
-                self.pred.append(1)
-                print("Move right")
-            elif left > 0 or lefts > 0:
-                msg.linear.x = 0
-                msg.angular.z = 1.2
-                self.pred.append(3)
-                print("Move left")
-            elif right > 0 or rights > 0:
-                msg.linear.x = -0.2
-                msg.angular.z = 0
-                self.pred.append(1)
-                print("Move backwards")
-            else:
-                msg.linear.x = -0.2
-                msg.angular.z = 0
-                self.pred.append(2)
-                print("Move backwards")
-        else:
-            if left > 2 or lefts > 2:
-                msg.linear.x = 0
-                msg.angular.z = 0.5
-                self.pred.append(3)
-                print("Move left")
-            elif right > 2 or rights > 2:
-                msg.linear.x = 0
-                msg.angular.z = -0.5
-                self.pred.append(1)
-                print("Move right")
-            elif central > 2:
-                msg.linear.x = 0.2
-                msg.angular.z = 0
-                self.pred.append(0)
-                print("Move forwards")
-            elif left > 1 or lefts > 1:
-                msg.linear.x = 0
-                msg.angular.z = 0.8
-                self.pred.append(3)
-                print("Move left")
-            elif right > 1 or rights > 1:
-                msg.linear.x = 0
-                msg.angular.z = -0.8
-                self.pred.append(1)
-                print("Move right")
-            elif left > 0 or lefts > 0:
-                msg.linear.x = 0
-                msg.angular.z = 1.2
-                self.pred.append(3)
-                print("Move left")
-            elif right > 0 or rights > 0:
-                msg.linear.x = -0.2
-                msg.angular.z = 0
-                self.pred.append(1)
-                print("Move backwards")
-            else:
-                msg.linear.x = -0.2
-                msg.angular.z = 0
-                self.pred.append(2)
-                print("Move backwards")
+
 
         # if central > 2:
         #     msg.linear.x = 0.2
