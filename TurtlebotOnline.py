@@ -26,6 +26,7 @@ class Turtlebot:
         self.aim="ahead"
         self.p_prev = [0]
         self.pred = []
+        self.cont = 0
         self.prev_stage = 0
         self.ini_pose = [0,0]
         self.exp = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -73,19 +74,22 @@ class Turtlebot:
         for j in range(108):
             x2 = ImageManager.retrieve_data2(parts2[j], parts2_hsv[j], parts2_BaW[j])
             p2.append(int(turtlebot.svm.get_model().predict(np.asarray(x2).reshape(1, len(x2)))))
-
+        self.debug2(p2, self.image, segments)
+        cv2.waitKey()
+        cv2.destroyAllWindows()
         send = Twist()
         #r = rospy.Rate(5);
         p = p2
         s=0
         #if(len(p)>1):
-        #print(p[84-s:96-s])
+        print(p[72-s:84-s])
+        print(p[84-s:96-s])
         #print(p[96-s:108-s])
-        left = sum(p[84-s:88-s])
+        left = sum(p[72-s:76-s])
         central = sum(p[88-s:92-s])
-        right = sum(p[92-s:96-s])
-        lefts = sum(p[96-s:100-s])
-        rights = sum(p[104-s:108-s])
+        right = sum(p[80-s:84-s])
+        lefts = sum(p[84-s:88-s])
+        rights = sum(p[92-s:96-s])
         #self.stage = 200
         #print(central)
         if(not(self.p_prev == p)):
@@ -228,6 +232,7 @@ class Turtlebot:
                         send.linear.x = 0.2
                         send.angular.z = 0
                         print("Move forward")
+                        self.cont += 1
                 else:
                     if(left + lefts > 4):
                         #print "pasa a BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB XD"
@@ -237,6 +242,7 @@ class Turtlebot:
                         send.linear.x = 0.2
                         send.angular.z = 0
                         print("Move forward")
+                        self.cont += 1
             elif(self.stage == 101):
                 ##esquivar B
                 print("esquivar BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
@@ -250,8 +256,10 @@ class Turtlebot:
                     else:
                         send.linear.x = 0.2
                         send.angular.z = 0
-                        print("Move forward")
+                        print("Move forward1")
                 else:
+                    print("Left: %d" % left)
+                    print("Lefts: %d   " % lefts)
                     if(left + lefts > 4):
                         self.girar(1)
                         self.stage = 102
@@ -259,13 +267,13 @@ class Turtlebot:
                     else:
                         send.linear.x = 0.2
                         send.angular.z = 0
-                        print("Move forward")
+                        print("Move forward2")
             elif(self.stage==102):
                 #esquivar c
                 print("esquivar CCCCCCCCCCCCCCCCCCCCCCCC")
                 if(self.aim == "left"):
                     if(self.prev_stage == 1):
-                        if(msg.pose.pose.position.y < self.ini_pos[1]):
+                        if(self.cont > 0):
                             send.linear.x = 0.2
                             send.angular.z = 0
                             print("Move forward")
