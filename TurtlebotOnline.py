@@ -8,6 +8,7 @@ from math import radians, sqrt
 import ImageManager
 import numpy as np
 import cv2
+import time
 
 
 class Turtlebot:
@@ -61,10 +62,10 @@ class Turtlebot:
         r = rospy.Rate(5);
         for x in range(0,10):
             send.linear.x = 0
-            send.angular.z = radians(60*dire)
-            r.sleep()
+            send.angular.z = radians(75*dire)
             print("girando")
             self.publisher.publish(send)
+            r.sleep()
 
     def move(self):
         position = self.position
@@ -96,6 +97,7 @@ class Turtlebot:
         rights = sum(p[92:96])
         #self.stage = 200
         #print(central)
+        t = rospy.rate(2)
         if(self.stage == 0):
             ##guardar posicion inicial
             self.ini_pos = (position.x, position.y)
@@ -123,7 +125,7 @@ class Turtlebot:
                 r = rospy.Rate(5);
                 for x in range(0,10):
                     send.linear.x = 0
-                    send.angular.z = radians(60)
+                    send.angular.z = radians(80)
                     r.sleep()
                     print("girando")
                     self.publisher.publish(send)
@@ -153,7 +155,7 @@ class Turtlebot:
                 r = rospy.Rate(5);
                 for x in range(0,10):
                     send.linear.x = 0
-                    send.angular.z = radians(45)
+                    send.angular.z = radians(80)
                     r.sleep()
                     print("girando")
                     self.publisher.publish(send)
@@ -183,7 +185,7 @@ class Turtlebot:
                 r = rospy.Rate(5);
                 for x in range(0,10):
                     send.linear.x = 0
-                    send.angular.z = radians(45)
+                    send.angular.z = radians(80)
                     r.sleep()
                     print("girando")
                     self.publisher.publish(send)
@@ -214,7 +216,7 @@ class Turtlebot:
                 r = rospy.Rate(5);
                 for x in range(0,10):
                     send.linear.x = 0
-                    send.angular.z = radians(45)
+                    send.angular.z = radians(80)
                     r.sleep()
                     print("girando")
                     self.publisher.publish(send)
@@ -228,6 +230,7 @@ class Turtlebot:
             send.angular.z = 0
             self.publisher.publish(send)
             self.cont += 1
+            time.sleep(1)
             if(self.aim=="left"):
                 self.girar(-1)
                 self.stage = 101
@@ -244,6 +247,7 @@ class Turtlebot:
                 else:
                     self.girar(-1)
                     self.stage = 100
+                time.sleep(1)
         elif(self.stage == 102):
             ##esquivar B
             print("esquivar BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
