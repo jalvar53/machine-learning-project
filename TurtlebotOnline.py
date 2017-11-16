@@ -4,11 +4,10 @@ from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Image
 from SvmModel import SvmModel
 from cv_bridge import CvBridge, CvBridgeError
-from math import radians
+from math import radians, sqrt
 import ImageManager
 import numpy as np
 import cv2
-import math
 
 
 class Turtlebot:
@@ -24,7 +23,9 @@ class Turtlebot:
         self.svm = SvmModel()
         self.x = 0
         self.stage = 0
+        self.aim="ahead"
         self.pred = []
+        self.prev_stage = 0
         self.ini_pose = [0,0]
         self.exp = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 1, 2, 3, 3,
@@ -49,11 +50,21 @@ class Turtlebot:
     def get_distance(self,a,b):
         print(a, "de funcion")
         print(b, "de funcion")
-        return (math.sqrt((a[0]-b[0])**2 + (a[1]-b[1])**2))
+        return (sqrt((a[0]-b[0])**2 + (a[1]-b[1])**2))
+
+    def girar(self, dire):
+        #si dire es uno gira a izq si es -1 gira a derecha
+        r = rospy.Rate(5);
+        for x in range(0,10):
+            send.linear.x = 0
+            send.angular.z = radians(45*dire)
+            r.sleep()
+            print("girando")
+            self.publisher.publish(send)
 
     def move(self, msg, p):
         send = Twist()
-        r = rospy.Rate(5);
+        #r = rospy.Rate(5);
         s=0
         #print(p[84-s:96-s])
         #print(p[96-s:108-s])
@@ -68,23 +79,238 @@ class Turtlebot:
             self.ini_pos = (msg.pose.pose.position.x, msg.pose.pose.position.y)
             self.stage=1
         elif(self.stage==1):
-            ##moverse hasta 14 de distancia
-            if(self.get_distance((msg.pose.pose.position.x, msg.pose.pose.position.y), self.ini_pos) < 6):
-                send.linear.x = 0.2
-                send.angular.z = 0
-                print("Move forward")
+            ##moverse hasta 13.5 de distancia
+            if(self.get_distance((msg.pose.pose.position.x, msg.pose.pose.position.y), self.ini_pos) < 13.5):
+                if(central > 2):
+                    send.linear.x = 0.2
+                    send.angular.z = 0
+                    print("Move forward")
+                else:
+                    self.esquivar() ################no es funcion
+                    if(left + lefts > rigth + rigths):
+                        self.girar(1)
+                        self.aim="left"
+                    else:
+                        self.girar(-1)
+                        self.aim="right"
+                    self.prev_stage = 1
+                    self.stage=100
             else:
+                r = rospy.Rate(5);
                 for x in range(0,10):
                     send.linear.x = 0
                     send.angular.z = radians(45)
                     r.sleep()
                     print("girando")
+                    self.publisher.publish(send)
                 self.stage = 2
         elif(self.stage == 2):
-            print("llegue al destino y gire")
-        print(self.ini_pos, "aca")
-        print(msg.pose.pose.position.x,msg.pose.pose.position.y)
-        print self.get_distance((msg.pose.pose.position.x, msg.pose.pose.position.y), self.ini_pos)
+            ##guardar posicion inicial
+            self.ini_pos = (msg.pose.pose.position.x, msg.pose.pose.position.y)
+            self.stage=3
+        elif(self.stage == 3):
+            ##moverse hasta 26 de distancia
+            if(self.get_distance((msg.pose.pose.position.x, msg.pose.pose.position.y), self.ini_pos) < 26):
+                if(central > 2):
+                    send.linear.x = 0.2
+                    send.angular.z = 0
+                    print("Move forward")
+                else:
+                    self.esquivar() ################no es funcion
+                    if(left + lefts > rigth + rigths):
+                        self.girar(1)
+                        self.aim="left"
+                    else:
+                        self.girar(-1)
+                        self.aim="right"
+                    self.prev_stage = 1
+                    self.stage=100
+            else:
+                r = rospy.Rate(5);
+                for x in range(0,10):
+                    send.linear.x = 0
+                    send.angular.z = radians(45)
+                    r.sleep()
+                    print("girando")
+                    self.publisher.publish(send)
+                self.stage = 4
+        elif(self.stage==4):
+            ##guardar posicion inicial
+            self.ini_pos = (msg.pose.pose.position.x, msg.pose.pose.position.y)
+            self.stage=5
+        elif(self.stage==5):
+            ##moverse hasta 13.5 de distancia
+            if(self.get_distance((msg.pose.pose.position.x, msg.pose.pose.position.y), self.ini_pos) < 13.5):
+                if(central > 2):
+                    send.linear.x = 0.2
+                    send.angular.z = 0
+                    print("Move forward")
+                else:
+                    self.esquivar() ################no es funcion
+                    if(left + lefts > rigth + rigths):
+                        self.girar(1)
+                        self.aim="left"
+                    else:
+                        self.girar(-1)
+                        self.aim="right"
+                    self.prev_stage = 1
+                    self.stage=100
+            else:
+                r = rospy.Rate(5);
+                for x in range(0,10):
+                    send.linear.x = 0
+                    send.angular.z = radians(45)
+                    r.sleep()
+                    print("girando")
+                    self.publisher.publish(send)
+                self.stage = 6
+        elif(self.stage==6):
+            ##guardar posicion inicial
+            self.ini_pos = (msg.pose.pose.position.x, msg.pose.pose.position.y)
+            self.stage=7
+        elif(self.stage==7):
+            ##moverse hasta 26 de distancia
+            if(self.get_distance((msg.pose.pose.position.x, msg.pose.pose.position.y), self.ini_pos) < 26):
+                if(central > 2):
+                    send.linear.x = 0.2
+                    send.angular.z = 0
+                    print("Move forward")
+                else:
+                    self.esquivar() ################no es funcion
+                    if(left + lefts > rigth + rigths):
+                        self.girar(1)
+                        self.aim="left"
+                    else:
+                        self.girar(-1)
+                        self.aim="right"
+                    self.prev_stage = 1
+                    self.stage=100
+                print("Move forward")
+            else:
+                r = rospy.Rate(5);
+                for x in range(0,10):
+                    send.linear.x = 0
+                    send.angular.z = radians(45)
+                    r.sleep()
+                    print("girando")
+                    self.publisher.publish(send)
+                self.stage = 8
+        elif(self.stage==8):
+            print("hemos dado una vuelta")
+        elif(self.stage == 100):
+            ##esquivar A
+            if(self.aim=="left"):
+                if(right + rights > 4):
+                    self.girar(-1)
+                    self.stage == 101
+                else:
+                    send.linear.x = 0.2
+                    send.angular.z = 0
+                    print("Move forward")
+            else:
+                if(left + lefts > 4):
+                    self.girar(1)
+                    self.stage == 101
+                else:
+                    send.linear.x = 0.2
+                    send.angular.z = 0
+                    print("Move forward")
+        elif(self.stage == 101):
+            ##esquivar B
+            if(self.aim=="left"):
+                if(right + rights > 4):
+                    self.girar(-1)
+                    self.stage == 102
+                    self.aim= "right"
+                else:
+                    send.linear.x = 0.2
+                    send.angular.z = 0
+                    print("Move forward")
+            else:
+                if(left + lefts > 4):
+                    self.girar(1)
+                    self.stage == 102
+                    self.aim="left"
+                else:
+                    send.linear.x = 0.2
+                    send.angular.z = 0
+                    print("Move forward")
+        elif(self.stage==102):
+            ##esquivar C
+            if(self.aim == "left"):
+                if(self.prev_stage == 1):
+                    if(msg.pose.pose.position.y > self.ini_pos[1]):
+                        send.linear.x = 0.2
+                        send.angular.z = 0
+                        print("Move forward")
+                    else:
+                        self.girar(-1)
+                        self.stage = self.prev_stage
+                elif(self.prev_stage == 3):
+                    if(msg.pose.pose.position.x < self.ini_pos[0]):
+                        send.linear.x = 0.2
+                        send.angular.z = 0
+                        print("Move forward")
+                    else:
+                        self.girar(-1)
+                        self.stage = self.prev_stage
+                elif(self.prev_stage == 5):
+                    if(msg.pose.pose.position.y < self.ini_pos[1]):
+                        send.linear.x = 0.2
+                        send.angular.z = 0
+                        print("Move forward")
+                    else:
+                        self.girar(-1)
+                        self.stage = self.prev_stage
+                elif(self.prev_stage == 7):
+                    if(msg.pose.pose.position.x > self.ini_pos[0]):
+                        send.linear.x = 0.2
+                        send.angular.z = 0
+                        print("Move forward")
+                    else:
+                        self.girar(-1)
+                        self.stage = self.prev_stage
+            else:
+                if(self.prev_stage == 1):
+                    if(msg.pose.pose.position.y < self.ini_pos[1]):
+                        send.linear.x = 0.2
+                        send.angular.z = 0
+                        print("Move forward")
+                    else:
+                        self.girar(1)
+                        self.stage = self.prev_stage
+                elif(self.prev_stage == 3):
+                    if(msg.pose.pose.position.x > self.ini_pos[0]):
+                        send.linear.x = 0.2
+                        send.angular.z = 0
+                        print("Move forward")
+                    else:
+                        self.girar(1)
+                        self.stage = self.prev_stage
+                elif(self.prev_stage == 5):
+                    if(msg.pose.pose.position.y > self.ini_pos[1]):
+                        send.linear.x = 0.2
+                        send.angular.z = 0
+                        print("Move forward")
+                    else:
+                        self.girar(1)
+                        self.stage = self.prev_stage
+                elif(self.prev_stage == 7):
+                    if(msg.pose.pose.position.x < self.ini_pos[0]):
+                        send.linear.x = 0.2
+                        send.angular.z = 0
+                        print("Move forward")
+                    else:
+                        self.girar(1)
+                        self.stage = self.prev_stage
+
+        self.publisher.publish(send)
+
+
+
+        #print(self.ini_pos, "aca")
+        #print(msg.pose.pose.position.x,msg.pose.pose.position.y)
+        #print self.get_distance((msg.pose.pose.position.x, msg.pose.pose.position.y), self.ini_pos)
         self.publisher.publish(send)
 
         # destination = [-6,0]
