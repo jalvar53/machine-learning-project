@@ -61,7 +61,7 @@ class Turtlebot:
         r = rospy.Rate(5);
         for x in range(0,10):
             send.linear.x = 0
-            send.angular.z = radians(45*dire)
+            send.angular.z = radians(60*dire)
             r.sleep()
             print("girando")
             self.publisher.publish(send)
@@ -224,120 +224,73 @@ class Turtlebot:
         elif(self.stage == 100):
             ##esquivar A
             print("esquivar AAAAAAAAAAAAAAAAAAAAAA")
+            send.linear.x = 0.2
+            send.angular.z = 0
+            self.publisher.publish(send)
+            self.cont += 1
             if(self.aim=="left"):
-                if(right + rights > 4):
-                    #print "pasa a BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
-                    self.girar(-1)
-                    self.stage = 101
-                else:
-                    send.linear.x = 0.2
-                    send.angular.z = 0
-                    print("Move forward")
-                    self.cont += 1
+                self.girar(-1)
+                self.stage = 101
             else:
-                if(left + lefts > 4):
-                    #print "pasa a BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB XD"
-                    self.girar(1)
-                    self.stage = 101
-                else:
-                    send.linear.x = 0.2
-                    send.angular.z = 0
-                    print("Move forward")
-                    self.cont += 1
+                self.girar(1)
+                self.stage = 101
         elif(self.stage == 101):
+            if(central > 2):
+                self.stage = 102
+            else:
+                if(self.aim=="left"):
+                    self.girar(1)
+                    self.stage = 100
+                else:
+                    self.girar(-1)
+                    self.stage = 100
+        elif(self.stage == 102):
             ##esquivar B
             print("esquivar BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
+            send.linear.x = 0.2
+            send.angular.z = 0
+            self.publisher.publish(send)
             if(self.aim=="left"):
-                print("Right: %d" % right)
-                print("Rights: %d   " % rights)
-                if(right + rights > 4):
-                    self.girar(-1)
-                    self.stage = 102
-                    self.aim= "right"
-                else:
-                    send.linear.x = 0.2
-                    send.angular.z = 0
-                    print("Move forward1")
+                self.girar(-1)
+                self.stage = 103
             else:
-                print("Left: %d" % left)
-                print("Lefts: %d   " % lefts)
-                if(left + lefts > 4):
+                self.girar(1)
+                self.stage = 103
+        elif(self.stage==103):
+            if(central > 2):
+                self.stage = 104
+                if(self.aim=="left"):
+                    self.aim = "right"
+                else:
+                    self.aim = "left"
+            else:
+                if(self.aim=="left"):
                     self.girar(1)
                     self.stage = 102
-                    self.aim="left"
                 else:
-                    send.linear.x = 0.2
-                    send.angular.z = 0
-                    print("Move forward2")
-        elif(self.stage==102):
+                    self.girar(-1)
+                    self.stage = 102
+        elif(self.stage==104):
             #esquivar c
             print("esquivar CCCCCCCCCCCCCCCCCCCCCCCC")
             if(self.aim == "left"):
-                if(self.prev_stage == 1):
-                    if(self.cont > 0):
-                        send.linear.x = 0.2
-                        send.angular.z = 0
-                        print("Move forward")
-                    else:
-                        self.girar(-1)
-                        self.stage = self.prev_stage
-                elif(self.prev_stage == 3):
-                    if(position.x < self.ini_pos[0]):
-                        send.linear.x = 0.2
-                        send.angular.z = 0
-                        print("Move forward")
-                    else:
-                        self.girar(-1)
-                        self.stage = self.prev_stage
-                elif(self.prev_stage == 5):
-                    if(position.y > self.ini_pos[1]):
-                        send.linear.x = 0.2
-                        send.angular.z = 0
-                        print("Move forward")
-                    else:
-                        self.girar(-1)
-                        self.stage = self.prev_stage
-                elif(self.prev_stage == 7):
-                    if(position.x > self.ini_pos[0]):
-                        send.linear.x = 0.2
-                        send.angular.z = 0
-                        print("Move forward")
-                    else:
-                        self.girar(-1)
-                        self.stage = self.prev_stage
+                if(self.cont > 0):
+                    send.linear.x = 0.2
+                    send.angular.z = 0
+                    self.cont -= 1
+                    print("Move forward")
+                else:
+                    self.girar(-1)
+                    self.stage = self.prev_stage
             else:
-                if(self.prev_stage == 1):
-                    if(position.y < self.ini_pos[1]):
-                        send.linear.x = 0.2
-                        send.angular.z = 0
-                        print("Move forward")
-                    else:
-                        self.girar(1)
-                        self.stage = self.prev_stage
-                elif(self.prev_stage == 3):
-                    if(position.x > self.ini_pos[0]):
-                        send.linear.x = 0.2
-                        send.angular.z = 0
-                        print("Move forward")
-                    else:
-                        self.girar(-1)
-                        self.stage = self.prev_stage
-                elif(self.prev_stage == 5):
-                    if(position.y < self.ini_pos[1]):
-                        send.linear.x = 0.2
-                        send.angular.z = 0
-                        print("Move forward")
-                    else:
-                        self.girar(-1)
-                        self.stage = self.prev_stage
-                elif(self.prev_stage == 7):
-                    if(position.x < self.ini_pos[0]):
-                        send.linear.x = 0.2
-                        send.angular.z = 0
-                        print("Move forward")
-                    else:
-                        self.girar(-1)
-                        self.stage = self.prev_stage
+                if(self.cont > 0):
+                    send.linear.x = 0.2
+                    send.angular.z = 0
+                    self.cont -= 1
+                    print("Move forward")
+                else:
+                    self.girar(1)
+                    self.stage = self.prev_stage
 
         self.publisher.publish(send)
 
