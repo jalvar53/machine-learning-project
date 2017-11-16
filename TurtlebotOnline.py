@@ -8,8 +8,6 @@ from math import radians, sqrt
 import ImageManager
 import numpy as np
 import cv2
-import time
-
 
 class Turtlebot:
 
@@ -29,6 +27,7 @@ class Turtlebot:
         self.p_prev = [0]
         self.pred = []
         self.cont = 0
+        self.ini_pos = [0,0]
         self.prev_stage = 0
         self.ini_pose = [0,0]
         self.exp = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -60,9 +59,14 @@ class Turtlebot:
         #si dire es uno gira a izq si es -1 gira a derecha
         send = Twist()
         r = rospy.Rate(5);
+        send.linear.x = 0
+        send.angular.z = 0
+        print("parando")
+        self.publisher.publish(send)
+        r.sleep()
         for x in range(0,10):
             send.linear.x = 0
-            send.angular.z = radians(75*dire)
+            send.angular.z = radians(45*dire)
             print("girando")
             self.publisher.publish(send)
             r.sleep()
@@ -70,23 +74,20 @@ class Turtlebot:
     def move(self):
         position = self.position
         orientation = self.orientation
-        print(position)
         image = self.image
-        cv2.namedWindow("whate");
-        cv2.moveWindow("whate", 710,280);
-        cv2.imshow("whate", turtlebot.image)
+        cv2.namedWindow("original");
+        cv2.moveWindow("original", 710,280);
+        cv2.imshow("original", image)
         imageBaW = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        parts2, parts2_hsv, parts2_BaW, segments = ImageManager.slic_image(image, imageBaW, 9, 12)
+        parts, parts_hsv, parts_BaW, segments = ImageManager.slic_image(image, imageBaW, 9, 12)
         p = []
         for j in range(108):
-            x = ImageManager.retrieve_data2(parts2[j], parts2_hsv[j], parts2_BaW[j])
+            x = ImageManager.retrieve_data2(parts[j], parts_hsv[j], parts_BaW[j])
             p.append(int(turtlebot.svm.get_model().predict(np.asarray(x).reshape(1, len(x)))))
-        #self.debug2(p2, self.image, segments)
-        #cv2.waitKey(1000)
+        self.debug2(p, self.image, segments)
+        cv2.waitKey(500)
         #cv2.destroyAllWindows()
         send = Twist()
-        #r = rospy.Rate(5);
-        #if(len(p)>1):
         #print(p[72-s:84-s])
         #print(p[84-s:96-s])
         #print(p[96-s:108-s])
@@ -95,24 +96,21 @@ class Turtlebot:
         right = sum(p[80:84])
         lefts = sum(p[84:88])
         rights = sum(p[92:96])
-        #self.stage = 200
-        #print(central)
-        t = rospy.rate(2)
+        if(self.stage > 0):
+            print("distancia: %f" % self.get_distance((position.x, position.y), self.ini_pos))
         if(self.stage == 0):
             ##guardar posicion inicial
             self.ini_pos = (position.x, position.y)
             self.stage=1
-        elif(self.stage==1):
-            ##moverse hasta 13.5 de distancia
-            print(self.get_distance((position.x, position.y), self.ini_pos))
-            if(self.get_distance((position.x, position.y), self.ini_pos) < 1):
-                #print("central: %d" % central)
+        elif(self.stage == 1):
+            ##moverse hasta 26 de distancia
+            if(self.get_distance((position.x, position.y), self.ini_pos) < 26):
                 if(central > 2):
                     send.linear.x = 0.2
                     send.angular.z = 0
+                    self.publisher.publish(send)
                     print("Move forward")
                 else:
-                    print("esquivar")
                     if(left + lefts > right + rights):
                         self.girar(1)
                         self.aim="left"
@@ -122,104 +120,82 @@ class Turtlebot:
                     self.prev_stage = 1
                     self.stage=100
             else:
-                r = rospy.Rate(5);
-                for x in range(0,10):
-                    send.linear.x = 0
-                    send.angular.z = radians(80)
-                    r.sleep()
-                    print("girando")
-                    self.publisher.publish(send)
-                self.stage = 200
-        elif(self.stage == 2):
+                self.girar(1)
+                self.stage = 2
+        elif(self.stage==2):
             ##guardar posicion inicial
             self.ini_pos = (position.x, position.y)
             self.stage=3
-        elif(self.stage == 3):
-            ##moverse hasta 26 de distancia
-            if(self.get_distance((position.x, position.y), self.ini_pos) < 26):
+        elif(self.stage==3):
+            ##moverse hasta 13.5 de distancia
+            if(self.get_distance((position.x, position.y), self.ini_pos) < 13.5):
                 if(central > 2):
                     send.linear.x = 0.2
                     send.angular.z = 0
+                    self.publisher.publish(send)
                     print("Move forward")
                 else:
-                    self.esquivar() ################no es funcion
-                    if(left + lefts > rigth + rigths):
+                    if(left + lefts > right + rights):
                         self.girar(1)
                         self.aim="left"
                     else:
                         self.girar(-1)
                         self.aim="right"
-                    self.prev_stage = 1
+                    self.prev_stage = 3
                     self.stage=100
             else:
-                r = rospy.Rate(5);
-                for x in range(0,10):
-                    send.linear.x = 0
-                    send.angular.z = radians(80)
-                    r.sleep()
-                    print("girando")
-                    self.publisher.publish(send)
+                self.girar(1)
                 self.stage = 4
         elif(self.stage==4):
             ##guardar posicion inicial
             self.ini_pos = (position.x, position.y)
             self.stage=5
         elif(self.stage==5):
-            ##moverse hasta 13.5 de distancia
-            if(self.get_distance((position.x, position.y), self.ini_pos) < 13.5):
-                if(central > 2):
-                    send.linear.x = 0.2
-                    send.angular.z = 0
-                    print("Move forward")
-                else:
-                    self.esquivar() ################no es funcion
-                    if(left + lefts > rigth + rigths):
-                        self.girar(1)
-                        self.aim="left"
-                    else:
-                        self.girar(-1)
-                        self.aim="right"
-                    self.prev_stage = 1
-                    self.stage=100
-            else:
-                r = rospy.Rate(5);
-                for x in range(0,10):
-                    send.linear.x = 0
-                    send.angular.z = radians(80)
-                    r.sleep()
-                    print("girando")
-                    self.publisher.publish(send)
-                self.stage = 6
-        elif(self.stage==6):
-            ##guardar posicion inicial
-            self.ini_pos = (position.x, position.y)
-            self.stage=7
-        elif(self.stage==7):
             ##moverse hasta 26 de distancia
             if(self.get_distance((position.x, position.y), self.ini_pos) < 26):
                 if(central > 2):
                     send.linear.x = 0.2
                     send.angular.z = 0
+                    self.publisher.publish(send)
                     print("Move forward")
                 else:
-                    #self.esquivar() ################no es funcion
-                    if(left + lefts > rigth + rigths):
+                    if(left + lefts > right + rights):
                         self.girar(1)
                         self.aim="left"
                     else:
                         self.girar(-1)
                         self.aim="right"
-                    self.prev_stage = 1
+                    self.prev_stage = 5
                     self.stage=100
                 print("Move forward")
             else:
-                r = rospy.Rate(5);
-                for x in range(0,10):
-                    send.linear.x = 0
-                    send.angular.z = radians(80)
-                    r.sleep()
-                    print("girando")
+                self.girar(1)
+                self.stage = 6
+        elif(self.stage == 6):
+            ##guardar posicion inicial
+            self.ini_pos = (position.x, position.y)
+            self.stage=7
+        elif(self.stage==7):
+            ##moverse hasta 13.5 de distancia
+            if(self.get_distance((position.x, position.y), self.ini_pos) < 13.5):
+                #print("central: %d" % central)
+                if(central > 2):
+                    send.linear.x = 0.2
+                    send.angular.z = 0
                     self.publisher.publish(send)
+                    print("Move forward")
+                else:
+                    print("esquivar")
+                    if(left + lefts > right + rights):
+                        self.girar(1)
+                        self.aim="left"
+                    else:
+                        self.girar(-1)
+                        self.aim="right"
+                    self.prev_stage = 7
+                    self.stage=100
+            else:
+                self.girar(1)
                 self.stage = 8
         elif(self.stage==8):
             print("hemos dado una vuelta")
@@ -229,8 +205,8 @@ class Turtlebot:
             send.linear.x = 0.2
             send.angular.z = 0
             self.publisher.publish(send)
+            print("move forward")
             self.cont += 1
-            time.sleep(1)
             if(self.aim=="left"):
                 self.girar(-1)
                 self.stage = 101
@@ -247,13 +223,13 @@ class Turtlebot:
                 else:
                     self.girar(-1)
                     self.stage = 100
-                time.sleep(1)
         elif(self.stage == 102):
             ##esquivar B
             print("esquivar BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
             send.linear.x = 0.2
             send.angular.z = 0
             self.publisher.publish(send)
+            print("move forward")
             if(self.aim=="left"):
                 self.girar(-1)
                 self.stage = 103
@@ -282,6 +258,7 @@ class Turtlebot:
                     send.linear.x = 0.2
                     send.angular.z = 0
                     self.cont -= 1
+                    self.publisher.publish(send)
                     print("Move forward")
                 else:
                     self.girar(-1)
@@ -291,17 +268,17 @@ class Turtlebot:
                     send.linear.x = 0.2
                     send.angular.z = 0
                     self.cont -= 1
+                    self.publisher.publish(send)
                     print("Move forward")
                 else:
                     self.girar(1)
                     self.stage = self.prev_stage
 
-        self.publisher.publish(send)
-
     def shutdown(self):
         rospy.loginfo("Stopping Turtlebot")
         self.publisher.publish(Twist())
         rospy.sleep(1)
+        cv2.destroyAllWindows()
 
     def callback(self, data):
         try:
@@ -341,7 +318,7 @@ class Turtlebot:
         cv2.imshow("debug", self.imageBaW)
 
     def move_try(self, msg):
-        print(position)
+        print(msg.pose.pose.position)
 
 if __name__ == '__main__':
     turtlebot = Turtlebot()
@@ -352,6 +329,13 @@ if __name__ == '__main__':
         pass
     while not rospy.is_shutdown():
         turtlebot.move()
+
+
+
+
+
+
+
         ##implementacion diviendo imagen en cuadros
         # image = turtlebot.image
         # cv2.namedWindow("whate");

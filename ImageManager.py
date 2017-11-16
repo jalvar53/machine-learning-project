@@ -88,9 +88,9 @@ def slic_image(img, img_BaW, rows, columns):
         temp[pos] = img_BaW[pos]
         parts_BaW[i]=temp
     #print("tiempo para sacar partes: %f" % (time.time()-t))
-    #cv2.namedWindow("superpixels");
-    #cv2.moveWindow("superpixels", 20,20);
-    #cv2.imshow("superpixels", mark_boundaries(img,segments))
+    cv2.namedWindow("superpixels");
+    cv2.moveWindow("superpixels", 20,20);
+    cv2.imshow("superpixels", mark_boundaries(img,segments))
     #cv2.waitKey()
     #cv2.destroyAllWindows()
     return [parts, parts_hsv, parts_BaW, segments]
