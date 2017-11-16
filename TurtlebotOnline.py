@@ -62,11 +62,22 @@ class Turtlebot:
             print("girando")
             self.publisher.publish(send)
 
-    def move(self, msg, args):
+    def move(self, msg):
+        #image = self.image
+        #cv2.namedWindow("whate");
+        #cv2.moveWindow("whate", 710,280);
+        #cv2.imshow("whate", turtlebot.image)
+        imageBaW = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
+        parts2, parts2_hsv, parts2_BaW, segments = ImageManager.slic_image(self.image, imageBaW, 9, 12)
+        p2 = []
+        for j in range(108):
+            x2 = ImageManager.retrieve_data2(parts2[j], parts2_hsv[j], parts2_BaW[j])
+            p2.append(int(turtlebot.svm.get_model().predict(np.asarray(x2).reshape(1, len(x2)))))
+
         send = Twist()
         #r = rospy.Rate(5);
-        p = args[0]
-        s=args[1]
+        p = p2
+        s=0
         #if(len(p)>1):
         #print(p[84-s:96-s])
         #print(p[96-s:108-s])
@@ -212,7 +223,7 @@ class Turtlebot:
                     if(right + rights > 4):
                         #print "pasa a BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
                         self.girar(-1)
-                        self.stage == 101
+                        self.stage = 101
                     else:
                         send.linear.x = 0.2
                         send.angular.z = 0
@@ -221,7 +232,7 @@ class Turtlebot:
                     if(left + lefts > 4):
                         #print "pasa a BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB XD"
                         self.girar(1)
-                        self.stage == 101
+                        self.stage = 101
                     else:
                         send.linear.x = 0.2
                         send.angular.z = 0
@@ -231,10 +242,10 @@ class Turtlebot:
                 print("esquivar BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
                 if(self.aim=="left"):
                     print("Right: %d" % right)
-                    print("Rights: %d" % rights)
+                    print("Rights: %d   " % rights)
                     if(right + rights > 4):
                         self.girar(-1)
-                        self.stage == 102
+                        self.stage = 102
                         self.aim= "right"
                     else:
                         send.linear.x = 0.2
@@ -243,7 +254,7 @@ class Turtlebot:
                 else:
                     if(left + lefts > 4):
                         self.girar(1)
-                        self.stage == 102
+                        self.stage = 102
                         self.aim="left"
                     else:
                         send.linear.x = 0.2
@@ -452,18 +463,18 @@ if __name__ == '__main__':
         # cv2.destroyAllWindows()
 
         ##*************+implementacion de superpixeles**************************
-        image = turtlebot.image
-        #cv2.namedWindow("whate");
-        #cv2.moveWindow("whate", 710,280);
-        #cv2.imshow("whate", turtlebot.image)
-        imageBaW = cv2.cvtColor(turtlebot.image, cv2.COLOR_BGR2GRAY)
-        parts2, parts2_hsv, parts2_BaW, segments = ImageManager.slic_image(turtlebot.image, imageBaW, 9, 12)
-        p2 = []
-        for j in range(108):
-            x2 = ImageManager.retrieve_data2(parts2[j], parts2_hsv[j], parts2_BaW[j])
-            p2.append(int(turtlebot.svm.get_model().predict(np.asarray(x2).reshape(1, len(x2)))))
+        # image = turtlebot.image
+        # #cv2.namedWindow("whate");
+        # #cv2.moveWindow("whate", 710,280);
+        # #cv2.imshow("whate", turtlebot.image)
+        # imageBaW = cv2.cvtColor(turtlebot.image, cv2.COLOR_BGR2GRAY)
+        # parts2, parts2_hsv, parts2_BaW, segments = ImageManager.slic_image(turtlebot.image, imageBaW, 9, 12)
+        # p2 = []
+        # for j in range(108):
+        #     x2 = ImageManager.retrieve_data2(parts2[j], parts2_hsv[j], parts2_BaW[j])
+        #     p2.append(int(turtlebot.svm.get_model().predict(np.asarray(x2).reshape(1, len(x2)))))
         #turtlebot.move(p2, 0)
-        rospy.Subscriber('odom', Odometry, turtlebot.move, callback_args= (p2, 0))
+        rospy.Subscriber('odom', Odometry, turtlebot.move)
         #turtlebot.debug2(p2, turtlebot.image, segments)
         #cv2.waitKey()
         #cv2.destroyAllWindows()
