@@ -51,9 +51,14 @@ class Turtlebot:
         return self.exp
 
     def get_distance(self,a,b):
-        #print(a)
-        #print(b)
         return (sqrt((a[0]-b[0])**2 + (a[1]-b[1])**2))
+
+    def andar(self):
+        send = Twist()
+        send.linear.x = 0.2
+        send.angular.z = 0
+        self.publisher.publish(send)
+        print("Move forward")
 
     def girar(self, dire):
         #si dire es uno gira a izq si es -1 gira a derecha
@@ -87,7 +92,7 @@ class Turtlebot:
         self.debug2(p, self.image, segments)
         cv2.waitKey(500)
         #cv2.destroyAllWindows()
-        send = Twist()
+        #send = Twist()
         #print(p[72-s:84-s])
         #print(p[84-s:96-s])
         #print(p[96-s:108-s])
@@ -106,10 +111,7 @@ class Turtlebot:
             ##moverse hasta 26 de distancia
             if(self.get_distance((position.x, position.y), self.ini_pos) < 26):
                 if(central > 2):
-                    send.linear.x = 0.2
-                    send.angular.z = 0
-                    self.publisher.publish(send)
-                    print("Move forward")
+                    self.andar()
                 else:
                     if(left + lefts > right + rights):
                         self.girar(1)
@@ -130,10 +132,7 @@ class Turtlebot:
             ##moverse hasta 13.5 de distancia
             if(self.get_distance((position.x, position.y), self.ini_pos) < 13.5):
                 if(central > 2):
-                    send.linear.x = 0.2
-                    send.angular.z = 0
-                    self.publisher.publish(send)
-                    print("Move forward")
+                    self.andar()
                 else:
                     if(left + lefts > right + rights):
                         self.girar(1)
@@ -154,10 +153,7 @@ class Turtlebot:
             ##moverse hasta 26 de distancia
             if(self.get_distance((position.x, position.y), self.ini_pos) < 26):
                 if(central > 2):
-                    send.linear.x = 0.2
-                    send.angular.z = 0
-                    self.publisher.publish(send)
-                    print("Move forward")
+                    self.andar()
                 else:
                     if(left + lefts > right + rights):
                         self.girar(1)
@@ -178,12 +174,8 @@ class Turtlebot:
         elif(self.stage==7):
             ##moverse hasta 13.5 de distancia
             if(self.get_distance((position.x, position.y), self.ini_pos) < 13.5):
-                #print("central: %d" % central)
                 if(central > 2):
-                    send.linear.x = 0.2
-                    send.angular.z = 0
-                    self.publisher.publish(send)
-                    print("Move forward")
+                    self.andar()
                 else:
                     print("esquivar")
                     if(left + lefts > right + rights):
@@ -202,10 +194,7 @@ class Turtlebot:
         elif(self.stage == 100):
             ##esquivar A
             print("esquivar AAAAAAAAAAAAAAAAAAAAAA")
-            send.linear.x = 0.2
-            send.angular.z = 0
-            self.publisher.publish(send)
-            print("move forward")
+            self.andar()
             self.cont += 1
             if(self.aim=="left"):
                 self.girar(-1)
@@ -226,9 +215,7 @@ class Turtlebot:
         elif(self.stage == 102):
             ##esquivar B
             print("esquivar BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
-            send.linear.x = 0.2
-            send.angular.z = 0
-            self.publisher.publish(send)
+            self.andar()
             print("move forward")
             if(self.aim=="left"):
                 self.girar(-1)
@@ -255,21 +242,15 @@ class Turtlebot:
             print("esquivar CCCCCCCCCCCCCCCCCCCCCCCC")
             if(self.aim == "left"):
                 if(self.cont > 0):
-                    send.linear.x = 0.2
-                    send.angular.z = 0
+                    self.andar()
                     self.cont -= 1
-                    self.publisher.publish(send)
-                    print("Move forward")
                 else:
                     self.girar(-1)
                     self.stage = self.prev_stage
             else:
                 if(self.cont > 0):
-                    send.linear.x = 0.2
-                    send.angular.z = 0
+                    self.andar()
                     self.cont -= 1
-                    self.publisher.publish(send)
-                    print("Move forward")
                 else:
                     self.girar(1)
                     self.stage = self.prev_stage
@@ -324,7 +305,6 @@ if __name__ == '__main__':
     turtlebot = Turtlebot()
     rospy.init_node('Turtlebot', anonymous=False)
     turtlebot.svm.load_model()
-    rate = rospy.Rate(10)
     while not turtlebot.image_received:
         pass
     while not rospy.is_shutdown():
